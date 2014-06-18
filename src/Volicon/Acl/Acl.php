@@ -440,13 +440,7 @@ class Acl implements AclResult {
 		$role = (object)$role;
 		$role_name = $role->name;
 		
-		$admin = false;
-		if(isset($role->admin) && $role->admin) {
-			$user = \Auth::getUser();
-			if($this->isAdmin($user)) {
-				$admin = true;
-			}
-		}
+		$admin = isset($role->admin) && $role->admin;
 		
 		if(Role::getRoleId($role_name)) {
 			throw new \Exception('role already exist.');
@@ -480,13 +474,7 @@ class Acl implements AclResult {
 			return null;
 		}
 		
-		$admin = false;
-		if(isset($role->admin) && $role->admin) {
-			$user = \Auth::getUser();
-			if($this->isAdmin($user)) {
-				$admin = true;
-			}
-		}
+		$admin = isset($role->admin) && $role->admin;
 		
 		if($foundRole->name !== $role->name || $foundRole->admin != $admin) {
 			$foundRole->name = $role->name;
