@@ -1,0 +1,28 @@
+{
+    "name": "volicon/acl",
+    "description": "",
+    "authors": [
+        {
+            "name": "Nadav",
+            "email": "nadav.v@volicon.com"
+        }
+    ],
+    "require": {
+        "php": ">=5.3.0",
+        "illuminate/support": "4.*"
+    },
+	"require-dev": {
+        "phpunit/phpunit": "3.7.*",
+        "orchestra/testbench": "2.0.*",
+		"mockery/mockery": "dev-master@dev"
+    },
+    "autoload": {
+        "classmap": [
+            "src/migrations"
+        ],
+        "psr-0": {
+            "Volicon\\Acl\\": "src/"
+        }
+    },
+    "minimum-stability": "dev"
+}
