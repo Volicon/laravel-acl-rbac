@@ -16,6 +16,8 @@ class Acl implements AclResult {
 	
 	public $result			= self::DISALLOW;
 	public $values_perms	= [];
+	
+	protected $_guard			= true;
 
 	/**
 	 * 
@@ -26,6 +28,11 @@ class Acl implements AclResult {
 	public function check($resource = null, array $additional_values = [], $user_id = null) {
 		
 		$result			= new Acl();
+		
+		if(!$this->_guard) {
+			$result->result = Acl::ALLOWED;
+			return $result;
+		}
 		
 		$default_permission = \Config::get("acl::config.default_permission");
 		
@@ -155,6 +162,19 @@ class Acl implements AclResult {
 	
 	public function checkForWhere($resource = null, $user = null) {
 		
+		$default_permission = \Config::get("acl::config.default_permission");
+		
+		$result = (object)array(
+			'result' => $default_permission,
+			'values' => [],
+			'include' => true
+		);
+		
+		if(!$this->_guard) {
+			$result->result = Acl::ALLOWED;
+			return $result;
+		}
+		
 		$resource = $this->_getResource($resource);
 		$user_id = $this->_getUserId($user);
 		
@@ -163,19 +183,14 @@ class Acl implements AclResult {
 		$is_admin = Role::whereIn('role_id', $roles_ids)->where('admin', '=', true)->get()->count() > 0;
 		
 		if($is_admin) {
-			$result = (object)array(
-				'result' => Acl::ALLOWED,
-				'values' => [],
-				'include' => true
-			);
+			$result->result = Acl::ALLOWED;
 			return $result;
 		}
 		
 		$permission = PermissionAttr::where('resource', '=', $resource)->first();
 		
 		if(!$permission) {
-			$default_permission = \Config::get("acl::config.default_permission");
-			return $default_permission === Acl::ALLOWED;
+			return $result;
 		}
 		
 		$permissions = RolePermission::where('permission_id', '=', $permission->permission_id)->whereIn('role_id', $roles_ids)->get();
@@ -197,6 +212,11 @@ class Acl implements AclResult {
 			'values' => [],
 			'include' => true
 		);
+		
+		if(!$this->_guard) {
+			$result->result = Acl::ALLOWED;
+			return $result;
+		}
 		
 		if(!$permissions|| !$permissions->count()) {
 			return $result;
@@ -266,6 +286,14 @@ class Acl implements AclResult {
 		}
 		
 		return $result;
+	}
+	
+	public function reguard() {
+		$this->_guard = true;
+	}
+	
+	public function unguard() {
+		$this->_guard = false;
 	}
 
 	/**
@@ -440,7 +468,13 @@ class Acl implements AclResult {
 		$role = (object)$role;
 		$role_name = $role->name;
 		
-		$admin = isset($role->admin) && $role->admin;
+		$admin = false;
+		
+		if(isset($role->admin) && $role->admin) {
+			if($this->isAdmin()) {
+				$admin = true;
+			}
+		}
 		
 		if(Role::getRoleId($role_name)) {
 			throw new \Exception('role already exist.');
@@ -474,7 +508,13 @@ class Acl implements AclResult {
 			return null;
 		}
 		
-		$admin = isset($role->admin) && $role->admin;
+		$admin = false;
+		
+		if(isset($role->admin) && $role->admin) {
+			if($this->isAdmin()) {
+				$admin = true;
+			}
+		}
 		
 		if($foundRole->name !== $role->name || $foundRole->admin != $admin) {
 			$foundRole->name = $role->name;
@@ -673,7 +713,8 @@ class Acl implements AclResult {
 	protected function _getUserId($user = null) {
 		
 		if(!$user) {
-			return \Auth::getUser()->user_id;
+			$user = \Auth::getUser(); 
+			return $user ? $user->user_id : false;
 		}
 		
 		if(is_numeric($user)) {
@@ -683,8 +724,18 @@ class Acl implements AclResult {
 		return $user->user_id;
 	}
 
-	public function isAdmin($user) {
+	public function isAdmin($user = null) {
+		
+		if(!$this->_guard) {
+			return true;
+		}
+		
 		$user_id = $this->_getUserId($user);
+		
+		if(!$user_id) {
+			return false;
+		}
+		
 		$roles = UserRole::where('user_id', '=', $user_id)->get(['role_id']);
 		$roles_ids = [];
 		foreach($roles as $role) {

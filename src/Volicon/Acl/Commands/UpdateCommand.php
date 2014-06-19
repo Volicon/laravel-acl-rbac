@@ -44,6 +44,8 @@ class UpdateCommand extends Command {
 			foreach ($roles as $row) {
 				$rolesMap[$row->name] = $row->role_id;
 			}
+			
+			\Acl::unguard();
 
 			foreach ($role_permissions as $role) {
 				$role_name = $role['name'];
@@ -55,6 +57,8 @@ class UpdateCommand extends Command {
 					\Acl::addRole($role);
 				}
 			}
+			
+			\Acl::reguard();
 			
 			$roles_ids = array_values($rolesMap);
 
@@ -87,7 +91,7 @@ class UpdateCommand extends Command {
 		$allow_resources	= Config::get("acl::config.allow_resources", array());
 		$special_resources	= Config::get("acl::config.special_resources", array());
 		
-		$models_actions		= array('select', 'update', 'delete');
+		$models_actions		= array('select', 'insert', 'update', 'delete');
 		foreach($allow_models as $model) {
 			foreach($models_actions as $action) {
 				$result[] = $model.'.'.$action;
