@@ -432,12 +432,11 @@ class Acl implements AclResult {
 			foreach($permissions_by_allowed as $resource=>&$items) {
 				$permissionId = $permissionsAttrIds[$resource];
 				
-				foreach ($items as $allowed=>&$data) {
-					$value = count($values) > 1 ? $values : array_pop($values);
+				foreach ($items as $allowed=>&$values) {
 				
 					$permissions[] = array(
 						'resource'	=> $resource,
-						'values'		=> $value,
+						'values'		=> $values,
 						'allowed'	=> $allowed
 					);
 					
