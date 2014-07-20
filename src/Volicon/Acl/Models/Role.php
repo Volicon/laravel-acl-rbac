@@ -26,15 +26,11 @@ class Role extends \Eloquent {
 	public static function getRoleId($role) {
 		$role_id = 0;
 		
-		if(is_numeric($role)) {
-			$role_id = $role;
-		} else {
-			$the_role = Role::where('name', '=', $role)->first(['role_id']);
-			if($the_role) {
-				$role_id = $the_role->role_id;
-			}
+		$the_role = Role::where('name', '=', $role)->first(['role_id']);
+		if($the_role) {
+			$role_id = $the_role->role_id;
 		}
-		
+
 		return $role_id;
 		
 	}
