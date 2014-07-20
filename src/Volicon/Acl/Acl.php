@@ -374,6 +374,11 @@ class Acl implements AclResult {
 	public function getRole($role, $resources=[]) {
 		$role_id = Role::getRoleId($role);
 		
+		return $this->getRoleById($role_id, $resources);
+		
+	}
+	
+	public function getRoleById($role_id, $resources=[]) {
 		$roles = $this->getRoles($resources, [$role_id]);
 		
 		$result = count($roles) ? $roles[0] : null;
