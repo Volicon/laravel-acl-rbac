@@ -1,10 +1,11 @@
 <?php namespace Volicon\Acl;
 
-use Volicon\Acl\Models\PermissionAttr;
+use Volicon\Acl\Models\GroupResources;
 use Volicon\Acl\Models\Role;
 use Volicon\Acl\Models\RolePermission;
 use Volicon\Acl\Models\UserRole;
 
+use Illuminate\Support\Facades\Config;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 
 /**
@@ -14,10 +15,20 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
  */
 class Acl implements AclResult {
 	
-	public $result			= self::DISALLOW;
-	public $values_perms	= [];
+	public $result						= self::DISALLOW;
+	public $values_perms				= [];
 	
-	protected $_guard			= true;
+	protected $_guard					= true;
+	protected $group_resources			= [];
+	protected $group_resources_ids		= [];
+	protected $route_resources_in_group	= [];
+
+
+	public function __construct() {
+		$this->group_resources	= Config::get('acl::config.group_resources');
+		$this->group_resources_ids = $this->get_group_resources_ids();
+		$this->route_resources_in_group = $this->get_route_resources_in_group($this->group_resources_ids);
+	}
 
 	/**
 	 * 
@@ -54,11 +65,9 @@ class Acl implements AclResult {
 			return $result;
 		}
 		
-		$admin_roles = array();
-		$admin_roles_rows = Role::where('admin', '=', true)->get(['role_id']);
-		foreach($admin_roles_rows as $role) {
-			$admin_roles[] = $role->role_id;
-		}
+		$admin_roles = Role::getAdminRoles();
+		
+		
 		
 		$user_roles_rows	= UserRole::where('user_id', '=', $user_id)->get(['role_id']);
 		
@@ -72,7 +81,7 @@ class Acl implements AclResult {
 			$user_roles[]	= $user_role->role_id;
 		}
 		
-		$permission_id = PermissionAttr::getResourceId($resource);
+		$permission_id = $this->getPermissionId($resource);
 		
 		if(!$permission_id) {
 			$result->result = $default_permission;
@@ -187,17 +196,15 @@ class Acl implements AclResult {
 			return $result;
 		}
 		
-		$permission = PermissionAttr::where('resource', '=', $resource)->first();
+		$permission_id = $this->getPermissionId($resource);;
 		
-		if(!$permission) {
+		if(!$permission_id) {
 			return $result;
 		}
 		
-		$permissions = RolePermission::where('permission_id', '=', $permission->permission_id)->whereIn('role_id', $roles_ids)->get();
+		$permissions = RolePermission::where('permission_id', '=', $permission_id)->whereIn('role_id', $roles_ids)->get();
 		
-		$result = $this->checkPermissions($permissions);
-		
-		return $result;
+		return $this->checkPermissions($permissions);
 		
 	}
 	
@@ -314,12 +321,10 @@ class Acl implements AclResult {
 		
 		foreach ($permissions as $permission) {
 			/* get permission by resource */
-			$permission_id = PermissionAttr::where('resource','=',$permission['resource'])->get();
-			$permission_id = $permission_id->toArray();
+			$permission_id = array_search($permission['resource'], $this->group_resources_ids);
 			
 			/* check if permission id is not null*/
-			if(is_array($permission_id) && isset($permission_id[0]['permission_id'])){
-				$permission_id = $permission_id[0]['permission_id'];
+			if($permission_id){
 				
 				/* set allowed -- default is 1 == allowed */
 				$allowed = ( isset($permission['allowed']) ? $permission['allowed'] : 1);
@@ -389,12 +394,16 @@ class Acl implements AclResult {
 	public function getRoles($resources = array(), $roleIds = array()) {
 		$result = array();
 		
-		$permissionAttr = $this->getPermissionAttr($resources);	// get resources
-		$permissionsAttrIds = array_flip($permissionAttr);
+		//TODO: need to filter resources
 		
-		$rolesRes = Role::with(array('permissions' => function(HasMany $query) use ($resources, $permissionsAttrIds) {
+		$resourcesIds = [];
+		foreach($resources as $resource) {
+			$resourcesIds[] = array_search($resource, $this->group_resources_ids);
+		}
+		
+		$rolesRes = Role::with(array('permissions' => function(HasMany $query) use ($resources, $resourcesIds) {
 			if(count($resources)) {
-				$query->whereIn('permission_id', $permissionsAttrIds);
+				$query->whereIn('permission_id', $resourcesIds);
 			}
 		}, 'users'))->select();
 		
@@ -411,7 +420,7 @@ class Acl implements AclResult {
 			$permissions_by_allowed = array();
 			foreach($permissionsRows as &$permission) {
 				
-				$resource = $permissionAttr[$permission->permission_id];
+				$resource = $this->group_resources_ids[$permission->permission_id];
 				
 				if(!isset($permissions_by_allowed[$resource])) {
 					$permissions_by_allowed[$resource] = array();
@@ -429,13 +438,13 @@ class Acl implements AclResult {
 				
 				$permissions['resource'] = '';
 				
-				$permission->resource		= $permissionAttr[$permission->permission_id];
+				$permission->resource		= $resource;
 			}
 			
 			$permissions = array();
 			
 			foreach($permissions_by_allowed as $resource=>&$items) {
-				$permissionId = $permissionsAttrIds[$resource];
+				$permissionId = array_search($resource, $this->group_resources_ids);
 				
 				foreach ($items as $allowed=>&$values) {
 				
@@ -632,22 +641,6 @@ class Acl implements AclResult {
 		return FALSE;
 		
 	}
-
-	public function getPermissionAttr($resources = array()) {
-		$result = array();
-		
-		if( count($resources) == 0 ){
-			$permissionsAttr = PermissionAttr::select()->get();
-		}else{
-			$permissionsAttr = PermissionAttr::whereIn('resource', $resources)->get();
-		}
-		
-		foreach ($permissionsAttr as $row) {
-			$result[$row->permission_id] = $row->resource;
-		}
-		
-		return $result;
-	}
 	
 	public function addWhere($resource, \Illuminate\Database\Eloquent\Builder $model, $db_field) {
 		$check = $this->checkForWhere($resource);
@@ -679,14 +672,14 @@ class Acl implements AclResult {
 		
 		$role = $role->role_id;
 		
-		$permission = PermissionAttr::where('resource', '=', $resource)->first();
+		$permission_id = $this->route_resources_in_group[$resource];
 		
-		if(!$permission) {
+		if(!$permission_id) {
 			$default_permission = \Config::get("acl::config.default_permission");
 			return $default_permission === Acl::ALLOWED;
 		}
 		
-		$permissions = RolePermission::where('permission_id', '=', $permission->permission_id)->where('role_id', '=', $role)->get();
+		$permissions = RolePermission::where('permission_id', '=', $permission_id)->where('role_id', '=', $role)->get();
 		$check = $this->checkPermissions($permissions);
 		
 		if($check->result == Acl::ALLOWED) { return true; }
@@ -747,6 +740,44 @@ class Acl implements AclResult {
 		}
 		
 		return Role::where('admin', '=', 1)->whereIn('role_id', $roles_ids)->limit(1)->count() > 0;
+	}
+
+	protected function get_group_resources_ids() {
+		$result = [];
+		GroupResources::all()->each(function($row) use(&$result){
+			$result[$row->permission_id] = $row->resource;
+		});
+		
+		return $result;
+	}
+
+	public function get_route_resources_in_group($group_resources_ids) {
+		
+		$result = [];
+		
+		foreach($this->group_resources as $group_name=>$resources) {
+			
+			if(!isset($resources['resources'])) {
+				$resources['resources'] = [];
+			}
+			
+			if(!isset($resources['access_resources'])) {
+				$resources['access_resources'] = [];
+			}
+			
+			$routes = array_merge($resources['resources'], $resources['access_resources']);
+			foreach($routes as $route) {
+				$result[$route] = array_search($group_name, $group_resources_ids);
+			}
+		}
+		return $result;
+	}
+
+	protected function getPermissionId($resource) {
+		if(isset($this->route_resources_in_group[$resource])) {
+			return $this->route_resources_in_group[$resource];
+		}
+		return null;
 	}
 
 }

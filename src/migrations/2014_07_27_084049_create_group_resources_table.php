@@ -3,7 +3,7 @@
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Database\Migrations\Migration;
 
-class CreatePermissionAttrTable extends Migration {
+class CreateGroupResourcesTable extends Migration {
 
 	/**
 	 * Run the migrations.
@@ -12,12 +12,11 @@ class CreatePermissionAttrTable extends Migration {
 	 */
 	public function up()
 	{
-		Schema::create('premission_attr', function(Blueprint $table)
+		$this->down();
+		Schema::create('group_resources', function(Blueprint $table)
 		{
 			$table->increments('permission_id');
 			$table->text('resource');
-			$table->text('name');
-			$table->timestamps();
 		});
 	}
 
@@ -28,7 +27,7 @@ class CreatePermissionAttrTable extends Migration {
 	 */
 	public function down()
 	{
-		Schema::drop('premission_attr');
+		Schema::dropIfExists('group_resources');
 	}
 
 }

@@ -34,4 +34,14 @@ class Role extends \Eloquent {
 		return $role_id;
 		
 	}
+	
+	public static function getAdminRoles() {
+		$admin_roles = array();
+		$admin_roles_rows = Role::where('admin', '=', true)->get(['role_id']);
+		foreach($admin_roles_rows as $role) {
+			$admin_roles[] = $role->role_id;
+		}
+		
+		return $admin_roles;
+	}
 }

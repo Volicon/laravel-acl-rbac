@@ -7,7 +7,7 @@ use Symfony\Component\Console\Input\InputOption;
 use Volicon\Acl\Models\Role;
 use Volicon\Acl\Models\UserRole;
 use Volicon\Acl\Models\RolePermission;
-use Volicon\Acl\Models\PermissionAttr;
+use Volicon\Acl\Models\GroupResources;
 
 class UpdateCommand extends Command {
 	
@@ -19,22 +19,21 @@ class UpdateCommand extends Command {
 		$updateRolesOpt = $this->option('update-roles');
 		
 		$role_permissions	= Config::get("acl::config.roles");
+		$group_resources	= Config::get("acl::config.group_resources");
 		
-		$permissionAttr		= PermissionAttr::all();
-		$rolePermission	= RolePermission::all();
+		$db_group_resources	= GroupResources::all();
+		$db_role_permissions	= RolePermission::all();
 		
-		if(!$rolePermission->count()) {
+		if(!$db_role_permissions->count()) {
 			$updateRolesOpt = true;
 		}
 		
-		$permissionAttrMap = array();
-		foreach ($permissionAttr as $row) {
-			$permissionAttrMap[$row->resource] = $row->permission_id;
+		$group_resources_map = array();
+		foreach ($db_group_resources as $row) {
+			$group_resources_map[$row->resource] = $row->permission_id;
 		}
 		
-		$config_resources	= $this->getConfigResources();
-		
-		$this->updateResorces($permissionAttrMap, $config_resources);
+		$this->updateResorces($group_resources_map, $group_resources);
 		
 		if($updateRolesOpt && count($role_permissions)) {
 			
@@ -82,43 +81,14 @@ class UpdateCommand extends Command {
         );
     }
 
-	protected function getConfigResources() {
-		
-		$result = array();
-		
-		$allow_models		= Config::get("acl::config.allow_models", array());
-		$resource_actions	= Config::get("acl::config.resourceActions", array());
-		$allow_resources	= Config::get("acl::config.allow_resources", array());
-		$special_resources	= Config::get("acl::config.special_resources", array());
-		
-		$models_actions		= array('select', 'insert', 'update', 'delete');
-		foreach($allow_models as $model) {
-			foreach($models_actions as $action) {
-				$result[] = $model.'.'.$action;
-			}
-		}
-		
-		foreach($allow_resources as $resource) {
-			foreach($resource_actions as $action) {
-				$result[] = snake_case($resource, '-').'.'.$action;
-			}
-		}
-		
-		foreach ($special_resources as $resource) {
-			$result[] = $resource;
-		}
-		
-		return $result;
-		
-	}
-
 	protected function updateResorces(&$db_resources_map, &$config_resources) {
 		$db_resources		= array_keys($db_resources_map);
+		$config_resources	= array_keys($config_resources);
 		
-		//delete permissions attr that are not in config
+		//delete group resources that are not in config
 		$not_in_config_resources = array_diff($db_resources, $config_resources);
 		if(count($not_in_config_resources)) {
-			PermissionAttr::whereIn('resource', $not_in_config_resources)->delete();
+			GroupResources::whereIn('resource', $not_in_config_resources)->delete();
 		}
 		
 		//delete role permissions then are not in config
@@ -135,9 +105,8 @@ class UpdateCommand extends Command {
 		$new_resources = array_diff($config_resources, $db_resources);
 		\Eloquent::unguard();
 		foreach($new_resources as $resource) {
-			PermissionAttr::create(array(
-				'resource'	=> $resource,
-				'name'		=> $resource
+			GroupResources::create(array(
+				'resource'	=> $resource
 			));
 		}
 		\Eloquent::reguard();

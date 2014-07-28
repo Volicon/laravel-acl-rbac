@@ -42,6 +42,8 @@ return array(
 	 */
 	'special_resources' => array(),
 	
+	'group_resources' => array(),
+	
 	/** 
 	 * Initial roles and permissions, you can add manually with Acl::addRole, AddRolePermission
 	 * 
