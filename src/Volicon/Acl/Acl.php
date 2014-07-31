@@ -22,12 +22,14 @@ class Acl implements AclResult {
 	protected $group_resources			= [];
 	protected $group_resources_ids		= [];
 	protected $route_resources_in_group	= [];
+	protected $allways_allow_resources	= [];
 
 
 	public function __construct() {
 		$this->group_resources	= Config::get('acl::config.group_resources');
 		$this->group_resources_ids = $this->get_group_resources_ids();
 		$this->route_resources_in_group = $this->get_route_resources_in_group($this->group_resources_ids);
+		$this->allways_allow_resources = \Config::get('acl::allways_allow_resources', []);
 	}
 
 	/**
@@ -41,6 +43,11 @@ class Acl implements AclResult {
 		$result			= new Acl();
 		
 		if(!$this->_guard) {
+			$result->result = Acl::ALLOWED;
+			return $result;
+		}
+		
+		if(in_array($resource, $this->allways_allow_resources)) {
 			$result->result = Acl::ALLOWED;
 			return $result;
 		}
@@ -95,6 +102,11 @@ class Acl implements AclResult {
 		
 		$permissions = RolePermission::select(['value', 'allowed'])->where('permission_id', '=', $permission_id)->whereIn('role_id', $user_roles)->get();
 		
+		if(!$permissions || !$permissions->count()) {
+			$result->result = $default_permission;
+			return $result;
+		}
+		
 		$values_arr = [];
 		
 		foreach ($additional_values as $v) {
@@ -107,11 +119,6 @@ class Acl implements AclResult {
 		$have_disallow_all			= false;
 		$not_have_allow_all			= true;
 		$current_type				= AclCheck::ONLY_TYPE_UNSET;
-		
-		if(!$permissions|| !$permissions->count()) {
-			$result->result = $default_permission;
-			return $result;
-		}
 		
 		foreach($permissions as $perm) {			
 			$current_type = AclCheck::checkForOnlyType($perm,$current_type);

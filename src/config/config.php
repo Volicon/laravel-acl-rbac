@@ -44,6 +44,11 @@ return array(
 	
 	'group_resources' => array(),
 	
+	/**
+	 * routes that allow for any user
+	 */
+	'allways_allow_resources' => [],
+	
 	/** 
 	 * Initial roles and permissions, you can add manually with Acl::addRole, AddRolePermission
 	 * 
