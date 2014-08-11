@@ -579,6 +579,37 @@ class Acl implements AclResult {
 		return $this->getUsersRoles($user_ids, $role_ids);
 	}
 	
+	public function getUserPermissions($user_id = null) {
+		$result = [];
+		
+		if(!$user_id) {
+			$user_id = \Auth::getUser()->user_id;
+		}
+		
+		if(!$user_id) {
+			return $result;
+		}
+		
+		$user_roles = $this->getRoles(array(), array($user_id));
+		
+		//$permissions_map = array();
+		
+		foreach ($user_roles as $role) {
+			
+			foreach($role['permissions'] as $permission) {
+				if(isset($result[$permission['resource']])) {
+					$result[$permission['resource']] = $this->mergePermission($result[$permission['resource']], $permission);
+				} else {
+					$result[$permission['resource']] = $permission;
+				}
+			}
+		}
+		
+		//$result = $user_roles;
+		
+		return $result;
+	}
+	
 	/**
 	 * set Role Permission
 	 * @param int $roleID
@@ -794,6 +825,71 @@ class Acl implements AclResult {
 		}
 		
 		return $permissions;
+	}
+
+	protected function mergePermission($permission1, $permission2) {
+		if($permission1->resource !== $permission2->resource) {
+			return array($permission1, $permission2);
+		}
+		
+		if(($permission1->allowed && $permission2->allowed) ||
+			($permission1->allowed && !$permission1->values) ||
+			($permission2->allowed && !$permission2->values)
+		) {
+			if(!$permission1->values || !$permission2->values) {
+				return array(
+					'resource' => $permission1->resource,
+					'values'	=> [],
+					'allowed'	=> true
+				);
+			} else {
+				return array(
+					'resource' => $permission1->resource,
+					'values'	=> array_merge($permission1->values, $permission2->values),
+					'allowed'	=> true
+				);
+			}
+		}
+		
+		if($permission2->allowed) {
+			$t				= $permission1;
+			$permission1	= $permission2;
+			$permission2	= $t;
+		}
+		
+		if($permission1->allowed) {
+			if(!$permission2->values) {
+				return $permission1;
+			}
+			
+			return array(
+				'resource' => $permission1->resource,
+				'values'	=> array_diff($permission2->values, $permission1->values),
+				'allowed'	=> false
+			);
+		}
+		
+		//both not allow
+		if(!$permission1->values && !$permission2->values) {
+			return $permission1;
+		}
+		
+		if($permission1->values && $permission2->values) {
+			return array(
+				'resource' => $permission1->resource,
+				'values'	=> array_intersect($permission1->values, $permission2->values),
+				'allowed'	=> false
+			);
+		}
+		
+		if($permission1->values) {
+			return $permission1;
+		}
+		
+		if($permission2->values) {
+			return $permission2;
+		}
+		
 	}
 
 }
