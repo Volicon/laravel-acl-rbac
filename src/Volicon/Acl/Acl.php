@@ -707,6 +707,10 @@ class Acl implements AclResult {
 			$roles_ids[] = $role->role_id;
 		}
 		
+		if(!$roles_ids) {
+			return false;
+		}
+		
 		return Role::where('admin', '=', 1)->whereIn('role_id', $roles_ids)->limit(1)->count() > 0;
 	}
 
