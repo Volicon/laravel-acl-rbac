@@ -424,47 +424,8 @@ class Acl implements AclResult {
 			$roleToAdd = $role->toArray();
 			
 			$permissionsRows = $role->permissions()->get(array('permission_id', 'value', 'allowed'));
-			$permissions_by_allowed = array();
-			foreach($permissionsRows as &$permission) {
-				
-				$resource = $this->group_resources_ids[$permission->permission_id];
-				
-				if(!isset($permissions_by_allowed[$resource])) {
-					$permissions_by_allowed[$resource] = array();
-				}
-				
-				$resourceInArr = &$permissions_by_allowed[$resource];
-				
-				if(!isset($resourceInArr[$permission->allowed])) {
-					$resourceInArr[$permission->allowed] = array();
-				}
-				
-				$values = &$resourceInArr[$permission->allowed];
-				
-				$values[] = $permission->value;
-				
-				$permissions['resource'] = '';
-				
-				$permission->resource		= $resource;
-			}
 			
-			$permissions = array();
-			
-			foreach($permissions_by_allowed as $resource=>&$items) {
-				$permissionId = array_search($resource, $this->group_resources_ids);
-				
-				foreach ($items as $allowed=>&$values) {
-				
-					$permissions[] = array(
-						'resource'	=> $resource,
-						'values'		=> $values,
-						'allowed'	=> $allowed
-					);
-					
-					
-					
-				}
-			}
+			$permissions = $this->parseDBPermissions($permissionsRows);
 			
 			$roleToAdd['permissions'] = $permissions;
 			
@@ -785,6 +746,50 @@ class Acl implements AclResult {
 			return $this->route_resources_in_group[$resource];
 		}
 		return null;
+	}
+
+	protected function parseDBPermissions($permissionsRows) {
+		$permissions_by_allowed = array();
+		foreach($permissionsRows as &$permission) {
+
+			$resource = $this->group_resources_ids[$permission->permission_id];
+
+			if(!isset($permissions_by_allowed[$resource])) {
+				$permissions_by_allowed[$resource] = array();
+			}
+
+			$resourceInArr = &$permissions_by_allowed[$resource];
+
+			if(!isset($resourceInArr[$permission->allowed])) {
+				$resourceInArr[$permission->allowed] = array();
+			}
+
+			$values = &$resourceInArr[$permission->allowed];
+
+			$values[] = $permission->value;
+
+			$permission->resource		= $resource;
+		}
+
+		$permissions = array();
+
+		foreach($permissions_by_allowed as $resource=>&$items) {
+			//$permissionId = array_search($resource, $this->group_resources_ids);
+
+			foreach ($items as $allowed=>&$values) {
+
+				$permissions[] = array(
+					'resource'	=> $resource,
+					'values'		=> $values,
+					'allowed'	=> $allowed
+				);
+
+
+
+			}
+		}
+		
+		return $permissions;
 	}
 
 }
