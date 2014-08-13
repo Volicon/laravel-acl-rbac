@@ -582,6 +582,18 @@ class Acl implements AclResult {
 	public function getUserPermissions($user_id = null) {
 		$result = [];
 		
+		if($this->isAdmin($user_id)) {
+			$groups_names = array_keys($this->group_resources);
+			foreach($groups_names as $group_name) {
+				$result[$group_name] = [
+					'resource'	=> $group_name,
+					'values'	=> [],
+					'allowed'	=> true
+				];
+			}
+			return $result;
+		}
+		
 		if(!$user_id) {
 			$user_id = \Auth::getUser()->user_id;
 		}
@@ -801,7 +813,9 @@ class Acl implements AclResult {
 
 			$values = &$resourceInArr[$permission->allowed];
 
-			$values[] = $permission->value;
+			if($permission->value) {
+				$values[] = $permission->value;
+			}
 
 			$permission->resource		= $resource;
 		}
