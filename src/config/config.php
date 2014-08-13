@@ -3,45 +3,23 @@
 return array(
 	
 	/**
-	 * List of models you can use in ACL.
-	 * It will filter models only from this list.
+	 * Group resources, resources can be routes or any custom resources like models
+	 * 
+	 * resources field - resources that need check also the values 
+	 * access_resources field - resources that check regardless the values, general aprove
+	 * 
+	 * for example:
+	 * array(
+	 *		'products.view' => [
+	 *			'resources' => [
+	 *				'products.show'
+	 *			],
+	 *			'access_resources' => [
+	 *				'products.index'
+	 *			]
+	 *		]
 	 * 
 	 */
-	'allow_models' => array(
-	),
-	
-	/**
-	 * 
-	 * example:
-	 *  you have resource "product"
-	 *	Route::resource('product', 'productController');
-	 *  Route::resource('catalog', 'catalogController');
-	 */
-	
-	/**
-	 * List of resources you can use in ACL.
-	 * It will check resources only from this list.
-	 * 
-	 * For example:
-	 * 'allow_resources' => array(
-	 *		'product',
-	 *		'catalog'
-	 * ),
-	 */
-	'allow_resources' => array(),
-	
-	/**
-	 * List of actions handle by ACL
-	 */
-	'resourceActions' => array('index', 'create', 'store', 'show', 'edit', 'update', 'destroy'),
-	
-	/**
-	 * List of special routes which not resource routing.
-	 * Example: array('home.helloWorld', ROUTING_NAME.ACTION_NAME);
-	 * 
-	 */
-	'special_resources' => array(),
-	
 	'group_resources' => array(),
 	
 	/**
