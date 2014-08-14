@@ -771,17 +771,7 @@ class Acl implements AclResult {
 		$result = [];
 		
 		foreach($this->group_resources as $group_name=>$resources) {
-			
-			if(!isset($resources['resources'])) {
-				$resources['resources'] = [];
-			}
-			
-			if(!isset($resources['access_resources'])) {
-				$resources['access_resources'] = [];
-			}
-			
-			$routes = array_merge($resources['resources'], $resources['access_resources']);
-			foreach($routes as $route) {
+			foreach($resources as $route) {
 				$result[$route] = array_search($group_name, $group_resources_ids);
 			}
 		}
@@ -841,7 +831,7 @@ class Acl implements AclResult {
 		return $permissions;
 	}
 
-	protected function mergePermission($permission1, $permission2) {
+	public function mergePermission($permission1, $permission2) {
 		if($permission1->resource !== $permission2->resource) {
 			return array($permission1, $permission2);
 		}
