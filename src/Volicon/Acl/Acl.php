@@ -8,6 +8,8 @@ use Volicon\Acl\Models\UserRole;
 use Illuminate\Support\Facades\Config;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 
+use InvalidArgumentException;
+
 /**
  * Description of Acl
  *
@@ -653,7 +655,12 @@ class Acl implements AclResult {
 		
 	}
 	
-	public function addWhere($resource, \Illuminate\Database\Eloquent\Builder $model, $db_field) {
+	public function addWhere($resource, $model, $db_field) {
+		
+		if(!is_a($model, '\Illuminate\Database\Eloquent\Builder') || is_a($model, 'Volicon\Acl\Models\AclModel')) {
+			throw new InvalidArgumentException('Argument 2 passed to Volicon\Acl\Acl::addWhere() must be an instance of Illuminate\Database\Eloquent\Builder or any derived class, instance of '.  get_class($model).' given');
+		}
+		
 		$check = $this->checkForWhere($resource);
 		if($check->result == Acl::ALLOWED) {return true; }
 		if($check->result == Acl::DISALLOW) {return false; }
@@ -667,7 +674,11 @@ class Acl implements AclResult {
 		return true;
 	}
 	
-	public function addWhereForRole($role, $resource, \Illuminate\Database\Eloquent\Builder $model, $db_field) {
+	public function addWhereForRole($role, $resource, $model, $db_field) {
+		
+		if(!(is_a($model, 'Illuminate\Database\Eloquent\Builder') || is_a($model, 'Volicon\Acl\Models\AclModel'))) {
+			throw new InvalidArgumentException('Argument 2 passed to Volicon\Acl\Acl::addWhereForRole() must be an instance of Illuminate\Database\Eloquent\Builder or any derived class, instance of '.  get_class($model).' given');
+		}
 		
 		if(is_numeric($role)) {
 			$role = Role::find($role);
