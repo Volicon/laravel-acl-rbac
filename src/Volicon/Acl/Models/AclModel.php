@@ -171,9 +171,9 @@ class AclModel extends Model {
 		return $this;
 	}
 	
-	protected function do_delete_operation($name, $arguments) {
+	protected function do_delete_operation($name, $arguments = []) {
 		if($this->use_acl) {
-			Acl::addWhere(get_class().'.delete', $this->builder);
+			Acl::addWhere(get_class().'.delete', $this->builder, $this->acl_field_key);
 		}
 		return call_user_func_array([$this->builder, $name], $arguments);
 	}
@@ -329,13 +329,15 @@ class AclModel extends Model {
 		Acl::addWhere(get_class().'.update', $this->model);
 		$this->addWhere($this->model);
 		return $this->model->update();
-	}
+	}*/
 	
 	public function delete() {
-		Acl::addWhere(get_class().'.delete', $this->model);
-		$this->addWhere($this->model);
-		return $this->model->delete();
-	}*/
+		/*if($this->use_acl) {
+			Acl::addWhere(get_class().'.delete', $this->builder, $this->acl_field_key);
+		}*/
+		//TODO: need to use model delete for check primaryKey, fireModelEvent and so on
+		return $this->do_delete_operation('delete');
+	}
 	
 	public static function with($relations) {
 		$self = new static;
