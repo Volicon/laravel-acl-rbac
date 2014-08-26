@@ -152,7 +152,7 @@ class AclModel extends Model {
 	protected function do_insert_operation($name, $arguments) {
 		if($this->use_acl) {
 			if($this->acl_field_key) {
-				Acl::addWhere(get_class().'.insert', $this->builder);
+				Acl::addWhere(get_class().'.insert', $this->builder, $this->acl_field_key);
 			}
 			$this->addWhere($this, 'insert');
 		}
@@ -163,7 +163,7 @@ class AclModel extends Model {
 	protected function do_update_operation($name, $arguments) {
 		if($this->use_acl) {
 			if($this->acl_field_key) {
-				Acl::addWhere(get_class().'.update', $this->builder);
+				Acl::addWhere(get_class().'.update', $this->builder, $this->acl_field_key);
 			}
 			$this->addWhere($this, 'update');
 		}
