@@ -203,13 +203,16 @@ class AclModel extends Model {
 	}
 
 	public function newQuery() {
-		$builder = parent::newQuery();
 		if($this->isMe()) {
-			return $builder;
+			return $this->builder ? $this->builder :  parent::newQuery();
 		} else {
-			$self = new static;
-			$self->builder = $builder;
-			return $self;
+			if($this->builder) {
+				return $this;
+			} else {
+				$self = new static;
+				$self->builder = parent::newQuery();
+				return $self;
+			}
 		}
 	}
 	
