@@ -32,7 +32,8 @@ class AclModel extends Model {
 		'whereNested', 'whereSub', 'whereExists', 'orWhereExists',
 		'whereNotExists', 'orWhereNotExists', 'orWhereIn', 'whereNotIn',
 		'orWhereNotIn', 'whereNull', 'orWhereNull', 'whereNotNull',
-		'orWhereNotNull', 'dynamicWhere', 'havingRaw', 'orHavingRaw', 'select'];
+		'orWhereNotNull', 'dynamicWhere', 'havingRaw', 'orHavingRaw', 'select',
+		'query'];
 	private $allow_info_operations = [
 		'getMutatedAttributes', 'offsetExists', 'offsetGet',
 		'getObservableEvents','getCreatedAtColumn', 'getUpdatedAtColumn',
@@ -347,7 +348,9 @@ class AclModel extends Model {
 	}
 
 	public static function query() {
-		return $this;
+		$self = new static;
+		$self->builder = $self->newQuery();
+		return $self;
 	}
 	
 	public static function on($connection = null) {
