@@ -5,6 +5,7 @@ use \Illuminate\Support\Collection;
 
 //use Volicon\Acl\Facades\Acl;
 use Acl;
+use App;
 
 /**
  * Description of Model
@@ -58,6 +59,10 @@ class AclModel extends Model {
 
 
 	public function __construct($attributes = []) {
+		
+		if(App::runningInConsole()) {
+			$this->use_acl = FALSE;
+		}
 		
 		$this->check_parms($attributes);
 		
