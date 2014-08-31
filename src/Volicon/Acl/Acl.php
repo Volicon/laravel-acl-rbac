@@ -42,19 +42,15 @@ class Acl implements AclResult {
 	 */
 	public function check($resource = null, array $additional_values = [], $user_id = null) {
 		
-		$result			= new Acl();
+		$default_permission = \Config::get("acl::config.default_permission");
 		
 		if(!$this->_guard) {
-			$result->result = Acl::ALLOWED;
-			return $result;
+			return true;
 		}
 		
 		if(in_array($resource, $this->allways_allow_resources)) {
-			$result->result = Acl::ALLOWED;
-			return $result;
+			return true;
 		}
-		
-		$default_permission = \Config::get("acl::config.default_permission");
 		
 		if(!$resource) {
 			$id			= $this->searchId(\Request::path());
@@ -70,43 +66,30 @@ class Acl implements AclResult {
 		}
 		
 		if(!$user_id) {
-			$result->result = Acl::DISALLOW;
-			return $result;
+			return false;
 		}
 		
-		$admin_roles = Role::getAdminRoles();
-		
-		
+		if($this->isAdmin($user_id)) {
+			return true;
+		}		
 		
 		$user_roles_rows	= UserRole::where('user_id', '=', $user_id)->get(['role_id']);
 		
 		$user_roles		= [];
 		foreach($user_roles_rows as $user_role) {
-			if(in_array($user_role->role_id, $admin_roles)) {
-				$result->result = Acl::ALLOWED;
-				$result->values_perms = [];
-				return $result;
-			}
 			$user_roles[]	= $user_role->role_id;
 		}
 		
 		$permission_id = $this->getPermissionId($resource);
 		
-		if(!$permission_id) {
-			$result->result = $default_permission;
-			return $result;
-		}
-		
 		if(!$permission_id || !$user_roles_rows->count()) {
-			$result->result = $default_permission;
-			return $result;
+			return $default_permission;
 		}
 		
 		$permissions = RolePermission::select(['value', 'allowed'])->where('permission_id', '=', $permission_id)->whereIn('role_id', $user_roles)->get();
 		
 		if(!$permissions || !$permissions->count()) {
-			$result->result = $default_permission;
-			return $result;
+			return $default_permission;
 		}
 		
 		$values_arr = [];
@@ -156,26 +139,22 @@ class Acl implements AclResult {
 		
 		if($values_arr) {
 			if(!$not_have_allow_all) {
-				$result->result	= Acl::ALLOWED;
-			} else if($have_permited_values && $have_not_permited_values) {
-				$result->result	= Acl::PARTLY_ALLOWED;
-			} else if($have_permited_values && !$have_not_permited_values) {
-				$result->result	= Acl::ALLOWED;
+				return true;
+			} else if($have_permited_values) {
+				return true;
 			} else if(!$have_permited_values && $have_not_permited_values) {
-				$result->result	= Acl::DISALLOW;
+				return false;
 			} else if($current_type == AclCheck::ONLY_TYPE_ALLOW && !$have_permited_values) {
-				$result->result	= Acl::DISALLOW;
+				return false;
 			} else if($current_type == AclCheck::ONLY_TYPE_FALSE && $have_disallow_all) {
-				$result->result	= Acl::DISALLOW;
+				return false;
 			} else {
-				$result->result	= Acl::ALLOWED;
+				return true;
 			}
-			
-			$result->values_perms = $values_arr;
 		}
 		
 		
-		return $result;
+		return $default_permission;
 	}
 	
 	public function checkForWhere($resource = null, $user = null) {
