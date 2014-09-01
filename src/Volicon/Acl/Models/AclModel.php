@@ -56,6 +56,7 @@ class AclModel extends Model {
 	private $allow_fill_operations = ['fill', 'newInstance', 'newFromBuilder',
 		'setCreatedAt', 'setUpdatedAt', 'setAttribute', 'setRawAttributes'];
 	private $allow_relationships_operations = ['with','hasMany'];
+	private $allow_table_manipulation_oprations = ['truncate'];
 
 
 	public function __construct($attributes = []) {
@@ -132,6 +133,13 @@ class AclModel extends Model {
 		if(in_array($name, $this->allow_fill_operations)) {
 			return $this->do_fill_operation($name, $arguments);
 		}
+		
+		if(in_array($name, $this->allow_table_manipulation_oprations)) {
+			if(!$this->use_acl) {
+				return parent::__call($name, $arguments);
+			}
+		}
+		
 	}
 	
 	//TODO: Not Implemented
