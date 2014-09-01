@@ -344,12 +344,13 @@ class AclModel extends Model {
 			Acl::addWhere(get_class().'.delete', $this->builder, $this->acl_field_key);
 		}*/
 		//TODO: need to use model delete for check primaryKey, fireModelEvent and so on
+		if($this->builder) {
+			return $this->do_delete_operation('delete');
+		} else {
+			//TODO: need to implement permission changes
+			return parent::delete();
+		}
 		
-		//TODO: need to implement
-		return parent::delete();
-		
-		
-		//return $this->do_delete_operation('delete');
 	}
 	
 	public static function with($relations) {
