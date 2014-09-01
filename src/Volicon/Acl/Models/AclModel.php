@@ -126,7 +126,7 @@ class AclModel extends Model {
 		}
 		
 		if(in_array($name, $this->allow_delete_operations)) {
-			return $this->do_update_operation($name, $arguments);
+			return $this->do_delete_operation($name, $arguments);
 		}
 		
 		if(in_array($name, $this->allow_fill_operations)) {
@@ -344,7 +344,12 @@ class AclModel extends Model {
 			Acl::addWhere(get_class().'.delete', $this->builder, $this->acl_field_key);
 		}*/
 		//TODO: need to use model delete for check primaryKey, fireModelEvent and so on
-		return $this->do_delete_operation('delete');
+		
+		//TODO: need to implement
+		return parent::delete();
+		
+		
+		//return $this->do_delete_operation('delete');
 	}
 	
 	public static function with($relations) {
