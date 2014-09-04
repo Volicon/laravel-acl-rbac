@@ -106,6 +106,9 @@ class AclModel extends Model {
 		}*/
 		
 		if(in_array($name, $this->allow_model_operations)) {
+			if(!$this->builder) {
+				$this->builder = $this->newQuery();
+			}
 			call_user_func_array([$this->builder, $name], $arguments);
 			return $this;
 		}
