@@ -6,6 +6,7 @@ use \Illuminate\Support\Collection;
 //use Volicon\Acl\Facades\Acl;
 use Acl;
 use App;
+use ErrorException;
 
 /**
  * Description of Model
@@ -14,49 +15,10 @@ use App;
  */
 class AclModel extends Model {
 	
+	/* @var $builder \Illuminate\Database\Eloquent\Builder */
 	private $builder = null;
 	private $use_acl = true;
 	protected $acl_field_key = '';
-
-
-	private $allow_model_operations = [
-		'where', 'whereIn', 'withTrashed', 'onlyTrashed', 'observe', 'saving',
-		'saved', 'updating', 'updated',
-		'creating', 'created', 'deleting', 'deleted', 'flushEventListeners',
-		'setSoftDeleting', 'fillable', 'guard', 'setPerPage' ,'setHidden',
-		'setVisible', 'unguard', 'reguard',	'setUnguardState',
-		'setIncrementing', 'syncOriginal', 'setEventDispatcher',
-		'setEventDispatcher', 'offsetUnset', 'orderBy','skip', 'take',
-		'forPage', 'union', 'unionAll', 'groupBy', 'having',
-		'addSelect', 'distinct', 'from', 'join', 'leftJoin', 'orWhere',
-		'whereRaw', 'orWhereRaw', 'whereBetween', 'orWhereBetween',
-		'whereNested', 'whereSub', 'whereExists', 'orWhereExists',
-		'whereNotExists', 'orWhereNotExists', 'orWhereIn', 'whereNotIn',
-		'orWhereNotIn', 'whereNull', 'orWhereNull', 'whereNotNull',
-		'orWhereNotNull', 'dynamicWhere', 'havingRaw', 'orHavingRaw', 'select',
-		'query'];
-	private $allow_info_operations = [
-		'getMutatedAttributes', 'offsetExists', 'offsetGet',
-		'getObservableEvents','getCreatedAtColumn', 'getUpdatedAtColumn',
-		'getDeletedAtColumn', 'getQualifiedDeletedAtColumn', 'freshTimestamp',
-		'trashed', 'getTable', 'getKey', 'getKeyName', 'getQualifiedKeyName',
-		'usesTimestamps', 'isSoftDeleting', 'getPerPage', 'isDirty',
-		'getForeignKey', 'getHidden', 'getFillable', 'toJson', 'toArray',
-		'isFillable', 'isGuarded', 'totallyGuarded', 'getIncrementing',
-		'attributesToArray', 'getAttribute', 'hasGetMutator', 'hasSetMutator',
-		'getDates', 'getAttributes', 'getOriginal',
-		'getDirty', 'getTablePrefix', 'toSql', 'getCacheKey',
-		'generateCacheKey',
-	];
-	private $allow_select_operetions = ['find', 'findOrFail', 'first', 'firstOrFail', 'get', 'pluck', 'lists', 'paginate', 'getFresh', 'getCached', 'implode',
-	'exists', 'count', 'min', 'max', 'sum', 'avg', 'aggregate'];
-	private $allow_insert_operations = [];
-	private $allow_update_operations = ['update', 'increment', 'decrement', 'restore', 'push', 'touch'];
-	private $allow_delete_operations = ['delete', 'forceDelete', 'destroy'];
-	private $allow_fill_operations = ['fill', 'newInstance', 'newFromBuilder',
-		'setCreatedAt', 'setUpdatedAt', 'setAttribute', 'setRawAttributes'];
-	private $allow_relationships_operations = ['with','hasMany'];
-	private $allow_table_manipulation_oprations = ['truncate'];
 
 
 	public function __construct($attributes = []) {
@@ -83,121 +45,19 @@ class AclModel extends Model {
 	public static function __callStatic($name, $arguments) {
 		$self = new static;
 		$self->builder = $self->newQuery();
-		if(in_array($name, $self->allow_select_operetions)) {
-			
-			return $self->do_select_operation($name, $arguments);
-			
-		}
 		
-		if(in_array($name, $self->allow_relationships_operations)) {
-			//$self->builder = $self->model->newQuery();
-			$self->builder = $self->newQuery();
-			return $self->do_relationships_operation($name, $arguments);
-		}
-		
-		return call_user_func_array([$self, $name], $arguments);
+		return call_user_func_array([$self->builder, $name], $arguments);
 	}
 	
 	public function __call($name, $arguments) {
-		
-		/*if(!$this->builder && in_array($name, $this->allow_init_builder_operations)) {
-			$this->builder = call_user_func_array([$this->model, $name], $arguments);
-			return $this;
-		}*/
-		
-		if(in_array($name, $this->allow_model_operations)) {
-			if(!$this->builder) {
-				$this->builder = $this->newQuery();
-			}
-			call_user_func_array([$this->builder, $name], $arguments);
-			return $this;
-		}
-		
-		if(in_array($name, $this->allow_info_operations)) {
-			return call_user_func_array([$this->builder, $name], $arguments);
-		}
-		
-		if(in_array($name, $this->allow_select_operetions)) {
-			return $this->do_select_operation($name, $arguments);
-		}
-		
-		if(in_array($name, $this->allow_insert_operations)) {
-			return $this->do_insert_operation($name, $arguments);
-		}
-		
-		if(in_array($name, $this->allow_update_operations)) {
-			return $this->do_update_operation($name, $arguments);
-		}
-		
-		if(in_array($name, $this->allow_delete_operations)) {
-			return $this->do_delete_operation($name, $arguments);
-		}
-		
-		if(in_array($name, $this->allow_fill_operations)) {
-			return $this->do_fill_operation($name, $arguments);
-		}
-		
-		if(in_array($name, $this->allow_table_manipulation_oprations)) {
-			if(!$this->use_acl) {
-				return parent::__call($name, $arguments);
-			}
-		}
-		
-	}
-	
-	//TODO: Not Implemented
-	protected function do_fill_operation($name, $arguments) {
-		throw new Exception('TODO: Not Implemented');
-	}
-	
-	protected function do_select_operation($name, $arguments) {
-		
 		if(!$this->builder) {
 			$this->builder = $this->newQuery();
 		}
-		if($this->use_acl) {
-			if($this->acl_field_key) {
-				Acl::addWhere(get_class().'.select', $this->builder, $this->acl_field_key);
-			}
-			$this->addWhere($this, 'select');
-		}
 		
 		return call_user_func_array([$this->builder, $name], $arguments);
+		
 	}
 	
-	protected function do_insert_operation($name, $arguments) {
-		if($this->use_acl) {
-			if($this->acl_field_key) {
-				Acl::addWhere(get_class().'.insert', $this->builder, $this->acl_field_key);
-			}
-			$this->addWhere($this, 'insert');
-		}
-		call_user_func_array([$this->builder, $name], $arguments);
-		return $this;
-	}
-	
-	protected function do_update_operation($name, $arguments) {
-		if($this->use_acl) {
-			if($this->acl_field_key) {
-				Acl::addWhere(get_class().'.update', $this->builder, $this->acl_field_key);
-			}
-			$this->addWhere($this, 'update');
-		}
-		call_user_func_array([$this->builder, $name], $arguments);
-		return $this;
-	}
-	
-	protected function do_delete_operation($name, $arguments = []) {
-		if($this->use_acl) {
-			Acl::addWhere(get_class().'.delete', $this->builder, $this->acl_field_key);
-		}
-		return call_user_func_array([$this->builder, $name], $arguments);
-	}
-	
-	protected function do_relationships_operation($name, $arguments) {
-		return call_user_func_array([$this->builder, $name], $arguments);
-	}
-
 	protected function check_parms($attributes = []) {
 		if(count($attributes) && !$this->checkParams($attributes)) {
 			throw New Exception("Wrong attrinutes for ".get_class($this)." args:".print_r($attributes, 1));
@@ -219,17 +79,29 @@ class AclModel extends Model {
 	}
 
 	public function newQuery() {
-		if($this->isMe()) {
-			return $this->builder ? $this->builder :  parent::newQuery();
-		} else {
-			if($this->builder) {
-				return $this;
-			} else {
-				$self = new static;
-				$self->builder = parent::newQuery();
-				return $self;
-			}
+		if(!$this->builder) {
+			$this->builder = parent::newQuery();
 		}
+		if(get_class($this->builder) != 'Volicon\Acl\Models\AclBuilder') {
+			//TODO find where builder get the real builder!!!
+			$this->builder = AclBuilder::toAclBuilder($this->builder);
+		}
+		if($this->isMe()) {
+			return $this->builder ? $this->builder->getRealBuilder() :  parent::newQuery()->getRealBuilder();
+		} else {
+		return $this->builder ? $this->builder : new AclBuilder;
+		}
+	}
+	
+	/**
+	 * Create a new Eloquent query builder for the model.
+	 *
+	 * @param  \Illuminate\Database\Query\Builder $query
+	 * @return \Illuminate\Database\Eloquent\Builder|static
+	 */
+	public function newEloquentBuilder($query)
+	{
+		return new AclBuilder($query);
 	}
 	
 	public function newQueryWithoutScope($scope) {
@@ -269,17 +141,6 @@ class AclModel extends Model {
 	
 	public function removeGlobalScopes($builder) {
 		$builder = parent::removeGlobalScopes($builder);
-		if($this->isMe()) {
-			return $builder;
-		} else {
-			$self = new static;
-			$self->builder = $builder;
-			return $self;
-		}
-	}
-	
-	public function newEloquentBuilder($query) {
-		$builder = parent::newEloquentBuilder($query);
 		if($this->isMe()) {
 			return $builder;
 		} else {
@@ -365,11 +226,12 @@ class AclModel extends Model {
 	}
 	
 	public static function with($relations) {
+		
 		$self = new static;
 		$result = call_user_func_array('parent::with', func_get_args());
 		//doc said it return builder or model
 		if(is_a($result, '\Illuminate\Database\Eloquent\Builder')) {
-			$self->builder = $result;
+			return AclBuilder::toAclBuilder($result);
 		}
 		return $self;
 	}
@@ -388,9 +250,7 @@ class AclModel extends Model {
 	
 	public static function all($columns = array('*'))
 	{
-		$instance = new static;
-		$instance->builder = $instance->newQuery();
-		return $instance->do_select_operation('get', func_get_args());
+		return static::query()->get($columns);
 	}
 	
 	public static function find($id, $columns = array('*')) {
@@ -398,9 +258,7 @@ class AclModel extends Model {
 			return new Collection;
 		}
 		
-		$instance = new static;
-		$instance->builder = $instance->newQuery();
-		return $instance->do_select_operation('find', func_get_args());
+		return static::query()->builder->find($id, $columns);
 	}
 	
 	//findOrNew, findOrFail use find
