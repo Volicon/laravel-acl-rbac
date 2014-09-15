@@ -262,11 +262,8 @@ class AclModel extends Model {
 		if (is_array($id) && empty($id)) {
 			return new Collection;
 		}
-		\debug('DBUG', 'here');
-		\debug('DBUG', get_class(static::query()->builder));
-		$t = static::query()->builder->find($id, $columns);
-		\debug('DBUG', get_class($t));
-		return static::query()->builder->find($id, $columns);
+		
+		return static::query()->find($id, $columns);
 	}
 
 	public function addWhere($model, $type) {
