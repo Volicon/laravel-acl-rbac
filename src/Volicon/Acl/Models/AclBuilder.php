@@ -41,7 +41,7 @@ class AclBuilder {
 		'attributesToArray', 'getAttribute', 'hasGetMutator', 'hasSetMutator',
 		'getDates', 'getAttributes', 'getOriginal',
 		'getDirty', 'getTablePrefix', 'toSql', 'getCacheKey',
-		'generateCacheKey',
+		'generateCacheKey', 'getModel'
 	];
 	private $allow_select_operetions = ['find', 'findOrFail', 'first', 'firstOrFail', 'get', 'pluck', 'lists', 'paginate', 'getFresh', 'getCached', 'implode',
 	'exists', 'count', 'min', 'max', 'sum', 'avg', 'aggregate'];
@@ -98,6 +98,24 @@ class AclBuilder {
 	}
 	
 	
+	public function getQuery() {
+		
+		$result = $this->builder->getQuery();
+		
+		$bt = debug_backtrace(DEBUG_BACKTRACE_IGNORE_ARGS, 2);
+		$file_parts = explode(DIRECTORY_SEPARATOR, $bt[0]['file']);
+		$class_file = implode('\\', array_slice($file_parts, -4));
+		$class = explode('.', $class_file)[0];
+		if($class == 'Illuminate\Database\Eloquent\Builder')
+		{
+			return $result;
+		}
+		
+		throw new Exception('prevent external use of getQuery');
+	}
+
+	
+
 	protected function do_select_operation($name, $arguments) {
 		if($this->use_acl) {
 			if($this->acl_field_key) {

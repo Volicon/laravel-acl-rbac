@@ -6,7 +6,6 @@ use \Illuminate\Support\Collection;
 //use Volicon\Acl\Facades\Acl;
 use Acl;
 use App;
-use ErrorException;
 
 /**
  * Description of Model
@@ -66,10 +65,6 @@ class AclModel extends Model {
 		return true;
 	}
 	
-	public function getModel() {
-		return $this;
-	}
-	
 	public function remember($minutes, $key = null) {
 		if(!$this->builder) {
 			$this->builder = $this->newQuery();
@@ -79,18 +74,17 @@ class AclModel extends Model {
 	}
 
 	public function newQuery() {
-		if(!$this->builder) {
-			$this->builder = parent::newQuery();
+		$builder = parent::newQuery();
+		
+		if($this->isCalledFromBuilder()) {
+			return $builder;
 		}
-		if(get_class($this->builder) != 'Volicon\Acl\Models\AclBuilder') {
-			//TODO find where builder get the real builder!!!
-			$this->builder = AclBuilder::toAclBuilder($this->builder);
+		
+		if($builder instanceof AclBuilder) {
+			return $builder;
 		}
-		if($this->isMe()) {
-			return $this->builder ? $this->builder->getRealBuilder() :  parent::newQuery()->getRealBuilder();
-		} else {
-		return $this->builder ? $this->builder : new AclBuilder;
-		}
+		
+		return AclBuilder::toAclBuilder($builder);
 	}
 	
 	/**
@@ -101,12 +95,17 @@ class AclModel extends Model {
 	 */
 	public function newEloquentBuilder($query)
 	{
-		return new AclBuilder($query);
+		$builder = parent::newEloquentBuilder($query);
+		if($this->isCalledFromBuilder()) {
+			return $builder;
+		}
+		
+		return new AclBuilder($builder);
 	}
 	
 	public function newQueryWithoutScope($scope) {
 		$builder = parent::newQueryWithoutScope($scope);
-		if($this->isMe()) {
+		if($this->isCalledFromBuilder()) {
 			return $builder;
 		} else {
 			$self = new static;
@@ -115,44 +114,46 @@ class AclModel extends Model {
 		}
 	}
 	
-	public function newQueryWithoutScopes() {
-		$self = new static;
-		$result = parent::newQueryWithoutScopes();
-		//doc said it return builder or model
-		if($this->isMe() || !is_a($result, '\Illuminate\Database\Eloquent\Builder')) {
-			return $result;
-		} else {
-			$self = new static;
-			$self->builder = $result;
-			return $self;
+	public function newQueryWithoutScopes() {//debug problem not a new
+		$builder = parent::newQueryWithoutScopes();
+		if($this->isCalledFromBuilder()) {
+			return $builder;
 		}
+		
+		if($builder instanceof \Illuminate\Database\Eloquent\Builder) {
+			$builder = AclBuilder::toAclBuilder($builder);
+		}
+		return $builder;
 	}
 	
 	public function applyGlobalScopes($builder) {
 		$builder = parent::applyGlobalScopes($builder);
-		if($this->isMe()) {
+		
+		if($this->isCalledFromBuilder()) {
 			return $builder;
-		} else {
-			$self = new static;
-			$self->builder = $builder;
-			return $self;
 		}
+		
+		if($builder instanceof \Illuminate\Database\Eloquent\Builder) {
+			$builder = AclBuilder::toAclBuilder($builder);
+		}
+		return $builder;
 	}
 	
 	public function removeGlobalScopes($builder) {
 		$builder = parent::removeGlobalScopes($builder);
-		if($this->isMe()) {
+		if($this->isCalledFromBuilder()) {
 			return $builder;
-		} else {
-			$self = new static;
-			$self->builder = $builder;
-			return $self;
 		}
+		
+		if($builder instanceof \Illuminate\Database\Eloquent\Builder) {
+			$builder = AclBuilder::toAclBuilder($builder);
+		}
+		
+		return $builder;
 	}
 	
-	//warning getConnection(),resolveConnection - must be public 
 	public function getConnection() {
-		if($this->isMe() || !$this->use_acl) {
+		if($this->isCalledFromBuilder() || !$this->use_acl) {
 			return parent::getConnection();
 		}
 		
@@ -161,7 +162,7 @@ class AclModel extends Model {
 	
 	public static function resolveConnection($connection = null) {
 		$self = new static;
-		if($self->isMe() || !$self->use_acl) {
+		if($self->isCalledFromBuilder() || !$self->use_acl) {
 			return parent::resolveConnection($connection);
 		}
 		
@@ -170,7 +171,7 @@ class AclModel extends Model {
 	
 	public static function getConnectionResolver() {
 		$self = new static;
-		if($self->isMe() || !$self->use_acl) {
+		if($self->isCalledFromBuilder() || !$self->use_acl) {
 			return parent::getConnectionResolver();
 		}
 		
@@ -238,6 +239,10 @@ class AclModel extends Model {
 
 	public static function query() {
 		$self = new static;
+		$builder = $self->newQuery();
+		if($self->isCalledFromBuilder()) {
+			return $builder;
+		}
 		$self->builder = $self->newQuery();
 		return $self;
 	}
@@ -257,11 +262,12 @@ class AclModel extends Model {
 		if (is_array($id) && empty($id)) {
 			return new Collection;
 		}
-		
+		\debug('DBUG', 'here');
+		\debug('DBUG', get_class(static::query()->builder));
+		$t = static::query()->builder->find($id, $columns);
+		\debug('DBUG', get_class($t));
 		return static::query()->builder->find($id, $columns);
 	}
-	
-	//findOrNew, findOrFail use find
 
 	public function addWhere($model, $type) {
 		return true;
@@ -271,10 +277,16 @@ class AclModel extends Model {
 		return true;
 	}
 
-	public function isMe() {
-		$bt = last(debug_backtrace(DEBUG_BACKTRACE_IGNORE_ARGS, 2));
+	private static function isCalledFromBuilder() {
+		$bt = last(debug_backtrace(DEBUG_BACKTRACE_IGNORE_ARGS, 5));
 		
-		return in_array($bt['class'], ['Volicon\Acl\Models\AclModel', '\Illuminate\Database\Eloquent\Model', 'Illuminate\Database\Eloquent\Builder']);
+		$bt = debug_backtrace(DEBUG_BACKTRACE_IGNORE_ARGS, 2);
+		$file_parts = explode(DIRECTORY_SEPARATOR, $bt[0]['file']);
+		$class_file = implode('\\', array_slice($file_parts, -4));
+		$class = explode('.', $class_file)[0];
+		$result = ($class == 'Illuminate\Database\Eloquent\Builder' || $class == 'Volicon\Acl\Models\AclModel');
+		
+		return $result;
 	}
 
 }

@@ -655,7 +655,7 @@ class Acl implements AclResult {
 	
 	public function addWhereForRole($role, $resource, $model, $db_field) {
 		
-		if(!(is_a($model, 'Illuminate\Database\Eloquent\Builder') || is_a($model, 'Volicon\Acl\Models\AclModel'))) {
+		if(!(is_a($model, 'Illuminate\Database\Eloquent\Builder') || is_a($model, 'Volicon\Acl\Models\AclBuilder'))) {
 			throw new InvalidArgumentException('Argument 2 passed to Volicon\Acl\Acl::addWhereForRole() must be an instance of Illuminate\Database\Eloquent\Builder or any derived class, instance of '.  get_class($model).' given');
 		}
 		
