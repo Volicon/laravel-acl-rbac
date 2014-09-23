@@ -15,7 +15,7 @@ class AclBuilder {
 	protected $acl_field_key = '';
 	
 	private $allow_model_operations = [
-		'where', 'whereIn', 'withTrashed', 'onlyTrashed', 'observe', 'saving',
+		'where', 'whereIn', 'withTrashed','whereHas', 'onlyTrashed', 'observe', 'saving',
 		'saved', 'updating', 'updated',
 		'creating', 'created', 'deleting', 'deleted', 'flushEventListeners',
 		'setSoftDeleting', 'fillable', 'guard', 'setPerPage' ,'setHidden',

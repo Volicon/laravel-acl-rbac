@@ -18,12 +18,14 @@ class AclModel extends Model {
 	private $builder = null;
 	private $use_acl = true;
 	protected $acl_field_key = '';
+	private static $enable_acl = true;
 
 
 	public function __construct($attributes = []) {
 		
 		if(App::runningInConsole()) {
 			$this->use_acl = FALSE;
+			self::$enable_acl = FALSE;
 		}
 		
 		$this->check_parms($attributes);
@@ -153,7 +155,7 @@ class AclModel extends Model {
 	}
 	
 	public function getConnection() {
-		if($this->isCalledFromBuilder() || !$this->use_acl) {
+		if($this->isCalledFromBuilder() || !$this->use_acl || !self::$enable_acl) {
 			return parent::getConnection();
 		}
 		
@@ -162,7 +164,7 @@ class AclModel extends Model {
 	
 	public static function resolveConnection($connection = null) {
 		$self = new static;
-		if($self->isCalledFromBuilder() || !$self->use_acl) {
+		if($self->isCalledFromBuilder() || !$self->use_acl || !self::$enable_acl) {
 			return parent::resolveConnection($connection);
 		}
 		
@@ -171,7 +173,7 @@ class AclModel extends Model {
 	
 	public static function getConnectionResolver() {
 		$self = new static;
-		if($self->isCalledFromBuilder() || !$self->use_acl) {
+		if($self->isCalledFromBuilder() || !$self->use_acl || self::$enable_acl) {
 			return parent::getConnectionResolver();
 		}
 		
@@ -275,15 +277,26 @@ class AclModel extends Model {
 	}
 
 	private static function isCalledFromBuilder() {
-		$bt = last(debug_backtrace(DEBUG_BACKTRACE_IGNORE_ARGS, 5));
+		//$bt = debug_backtrace(DEBUG_BACKTRACE_IGNORE_ARGS, 7);
+		//$bt = last($bt);
 		
 		$bt = debug_backtrace(DEBUG_BACKTRACE_IGNORE_ARGS, 2);
-		$file_parts = explode(DIRECTORY_SEPARATOR, $bt[0]['file']);
+		$file_parts = explode(DIRECTORY_SEPARATOR, $bt[1]['file']);
 		$class_file = implode('\\', array_slice($file_parts, -4));
 		$class = explode('.', $class_file)[0];
-		$result = ($class == 'Illuminate\Database\Eloquent\Builder' || $class == 'Volicon\Acl\Models\AclModel');
+		$result = ($class == 'Illuminate\Database\Eloquent\Builder' ||
+				  $class == 'Volicon\Acl\Models\AclModel' ||
+				 $class == 'Illuminate\Database\Eloquent\Model');
 		
 		return $result;
 	}
-
+	
+	public static function unguardAcl() {
+		self::$enable_acl = FALSE;
+	}
+	
+	public static function reguardAcl() {
+		self::$enable_acl = TRUE;
+	}
+	
 }
