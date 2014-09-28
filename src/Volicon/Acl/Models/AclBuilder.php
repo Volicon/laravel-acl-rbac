@@ -29,7 +29,7 @@ class AclBuilder {
 		'whereNotExists', 'orWhereNotExists', 'orWhereIn', 'whereNotIn',
 		'orWhereNotIn', 'whereNull', 'orWhereNull', 'whereNotNull',
 		'orWhereNotNull', 'dynamicWhere', 'havingRaw', 'orHavingRaw', 'select',
-		'query', 'setModel'];
+		'query', 'setModel', 'newQuery'];
 	private $allow_info_operations = [
 		'getMutatedAttributes', 'offsetExists', 'offsetGet',
 		'getObservableEvents','getCreatedAtColumn', 'getUpdatedAtColumn',
@@ -61,9 +61,6 @@ class AclBuilder {
 		}*/
 		if(in_array($name, $this->allow_model_operations)
 		|| in_array($name, $this->allow_relationships_operations)) {
-			if(!$this->builder) {
-				$this->builder = $this->newQuery();
-			}
 			
 			call_user_func_array([$this->builder, $name], $arguments);
 			return $this;
@@ -160,10 +157,13 @@ class AclBuilder {
 		return call_user_func_array([$this->builder, $name], $arguments);
 	}
 	
-	public static function toAclBuilder(Builder $builder) {
-		$instance = new static($builder);
-		$instance->builder = $builder;
-		return $instance;
+	public static function toAclBuilder($builder) {
+		if($builder instanceof static) {
+			return $builder;
+		}
+		
+		
+		return new static($builder);
 	}
 	
 	public function getRealBuilder() {

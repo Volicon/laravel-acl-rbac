@@ -82,10 +82,6 @@ class AclModel extends Model {
 			return $builder;
 		}
 		
-		if($builder instanceof AclBuilder) {
-			return $builder;
-		}
-		
 		return AclBuilder::toAclBuilder($builder);
 	}
 	
@@ -109,11 +105,9 @@ class AclModel extends Model {
 		$builder = parent::newQueryWithoutScope($scope);
 		if($this->isCalledFromBuilder()) {
 			return $builder;
-		} else {
-			$self = new static;
-			$self->builder = $builder;
-			return $self;
 		}
+		
+		return AclBuilder::toAclBuilder($builder);
 	}
 	
 	public function newQueryWithoutScopes() {//debug problem not a new
@@ -122,10 +116,7 @@ class AclModel extends Model {
 			return $builder;
 		}
 		
-		if($builder instanceof \Illuminate\Database\Eloquent\Builder) {
-			$builder = AclBuilder::toAclBuilder($builder);
-		}
-		return $builder;
+		return AclBuilder::toAclBuilder($builder);
 	}
 	
 	public function applyGlobalScopes($builder) {
@@ -233,7 +224,8 @@ class AclModel extends Model {
 		$self = new static;
 		$result = call_user_func_array('parent::with', func_get_args());
 		//doc said it return builder or model
-		if(is_a($result, '\Illuminate\Database\Eloquent\Builder')) {
+		if(is_a($result, '\Illuminate\Database\Eloquent\Builder') || 
+			is_a($result, 'Volicon\Acl\Models\AclBuilder')) {
 			return AclBuilder::toAclBuilder($result);
 		}
 		return $self;
@@ -245,14 +237,17 @@ class AclModel extends Model {
 		if($self->isCalledFromBuilder()) {
 			return $builder;
 		}
-		$self->builder = $self->newQuery();
-		return $self;
+		
+		return AclBuilder::toAclBuilder($builder);
 	}
 	
 	public static function on($connection = null) {
-		$self = new static;
-		$self->builder = parent::on($connection);
-		return $self;
+		$builder = parent::on($connection);
+		if(static::isCalledFromBuilder()) {
+			return $builder;
+		}
+		
+		return AclBuilder::toAclBuilder($builder);
 	}
 	
 	public static function all($columns = array('*'))
