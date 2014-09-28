@@ -112,7 +112,9 @@ class AclModel extends Model {
 	
 	public function newQueryWithoutScopes() {//debug problem not a new
 		$builder = parent::newQueryWithoutScopes();
-		if($this->isCalledFromBuilder()) {
+		
+		$bt = debug_backtrace(DEBUG_BACKTRACE_IGNORE_ARGS, 2);
+		if($this->isCalledFromBuilder() && $bt[1]['function'] !== 'where') {
 			return $builder;
 		}
 		
