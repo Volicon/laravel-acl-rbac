@@ -14,8 +14,6 @@ use App;
  */
 class AclModel extends Model {
 	
-	/* @var $builder \Illuminate\Database\Eloquent\Builder */
-	private $builder = null;
 	private $use_acl = true;
 	protected $acl_field_key = '';
 	private static $enable_acl = true;
@@ -45,17 +43,20 @@ class AclModel extends Model {
 
 	public static function __callStatic($name, $arguments) {
 		$self = new static;
-		$self->builder = $self->newQuery();
 		
-		return call_user_func_array([$self->builder, $name], $arguments);
+		return call_user_func_array([$self, $name], $arguments);
 	}
 	
-	public function __call($name, $arguments) {
-		if(!$this->builder) {
-			$this->builder = $this->newQuery();
+	public function __call($method, $arguments) {
+		
+		if (in_array($method, array('increment', 'decrement')))
+		{
+			return parent::__call($method, $parameters);
 		}
 		
-		return call_user_func_array([$this->builder, $name], $arguments);
+		$builder = $this->newQuery();
+		
+		return call_user_func_array([$builder, $method], $arguments);
 		
 	}
 	
@@ -65,14 +66,6 @@ class AclModel extends Model {
 		}
 		
 		return true;
-	}
-	
-	public function remember($minutes, $key = null) {
-		if(!$this->builder) {
-			$this->builder = $this->newQuery();
-		}
-		$this->builder->remember($minutes, $key);
-		return $this;
 	}
 
 	public function newQuery() {
@@ -193,32 +186,6 @@ class AclModel extends Model {
 		} else {
 			throw new \Exception("faild save ".get_class(new static).' fields:'.print_r($options, 1));
 		}
-	}
-	
-	/*public static function select($fields = []) {
-		$self = new static();
-		$self->builder = $self->newQuery()->select($fields);
-		return $self;
-	}*/
-	
-	/*public function update() {
-		Acl::addWhere(get_class().'.update', $this->model);
-		$this->addWhere($this->model);
-		return $this->model->update();
-	}*/
-	
-	public function delete() {
-		/*if($this->use_acl) {
-			Acl::addWhere(get_class().'.delete', $this->builder, $this->acl_field_key);
-		}*/
-		//TODO: need to use model delete for check primaryKey, fireModelEvent and so on
-		if($this->builder) {
-			return $this->do_delete_operation('delete');
-		} else {
-			//TODO: need to implement permission changes
-			return parent::delete();
-		}
-		
 	}
 	
 	public static function with($relations) {
