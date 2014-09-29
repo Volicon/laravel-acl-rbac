@@ -35,12 +35,6 @@ class AclModel extends Model {
 		}
 	}
 	
-	public static function disableACL() {
-		$self = new static;
-		$self->use_acl = false;
-		return $self;
-	}
-	
 	protected function check_parms($attributes = []) {
 		if(count($attributes) && !$this->checkParams($attributes)) {
 			throw New Exception("Wrong attrinutes for ".get_class($this)." args:".print_r($attributes, 1));
@@ -57,12 +51,28 @@ class AclModel extends Model {
 		return true;
 	}
 	
+	public static function disableACL() {
+		$self = new static;
+		$self->use_acl = false;
+		return $self;
+	}
+	
 	public static function unguardAcl() {
 		self::$enable_acl = FALSE;
 	}
 	
 	public static function reguardAcl() {
 		self::$enable_acl = TRUE;
+	}
+
+	public function newQuery() {
+		$builder = parent::newQuery();
+		
+		if($this->isCalledFromBuilder()) {
+			return $builder;
+		}
+		
+		return AclBuilder::toAclBuilder($builder);
 	}
 
 	public static function __callStatic($name, $arguments) {
@@ -82,16 +92,6 @@ class AclModel extends Model {
 		
 		return call_user_func_array([$builder, $method], $arguments);
 		
-	}
-
-	public function newQuery() {
-		$builder = parent::newQuery();
-		
-		if($this->isCalledFromBuilder()) {
-			return $builder;
-		}
-		
-		return AclBuilder::toAclBuilder($builder);
 	}
 	
 	/**
