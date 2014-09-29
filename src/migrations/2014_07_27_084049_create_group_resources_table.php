@@ -16,7 +16,7 @@ class CreateGroupResourcesTable extends Migration {
 		Schema::create('group_resources', function(Blueprint $table)
 		{
 			$table->increments('permission_id');
-			$table->text('resource');
+			$table->string('resource',255);
 		});
 	}
 
