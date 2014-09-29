@@ -40,6 +40,30 @@ class AclModel extends Model {
 		$self->use_acl = false;
 		return $self;
 	}
+	
+	protected function check_parms($attributes = []) {
+		if(count($attributes) && !$this->checkParams($attributes)) {
+			throw New Exception("Wrong attrinutes for ".get_class($this)." args:".print_r($attributes, 1));
+		}
+		
+		return true;
+	}
+
+	public function addWhere($model, $type) {
+		return true;
+	}
+	
+	public function checkParams(array $params) {
+		return true;
+	}
+	
+	public static function unguardAcl() {
+		self::$enable_acl = FALSE;
+	}
+	
+	public static function reguardAcl() {
+		self::$enable_acl = TRUE;
+	}
 
 	public static function __callStatic($name, $arguments) {
 		$self = new static;
@@ -58,14 +82,6 @@ class AclModel extends Model {
 		
 		return call_user_func_array([$builder, $method], $arguments);
 		
-	}
-	
-	protected function check_parms($attributes = []) {
-		if(count($attributes) && !$this->checkParams($attributes)) {
-			throw New Exception("Wrong attrinutes for ".get_class($this)." args:".print_r($attributes, 1));
-		}
-		
-		return true;
 	}
 
 	public function newQuery() {
@@ -232,14 +248,6 @@ class AclModel extends Model {
 		return static::query()->find($id, $columns);
 	}
 
-	public function addWhere($model, $type) {
-		return true;
-	}
-	
-	public function checkParams(array $params) {
-		return true;
-	}
-
 	private static function isCalledFromBuilder() {
 		//$bt = debug_backtrace(DEBUG_BACKTRACE_IGNORE_ARGS, 7);
 		//$bt = last($bt);
@@ -253,14 +261,6 @@ class AclModel extends Model {
 				 $class == 'Illuminate\Database\Eloquent\Model');
 		
 		return $result;
-	}
-	
-	public static function unguardAcl() {
-		self::$enable_acl = FALSE;
-	}
-	
-	public static function reguardAcl() {
-		self::$enable_acl = TRUE;
 	}
 	
 }
