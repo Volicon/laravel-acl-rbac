@@ -79,6 +79,15 @@ class AclModel extends Model {
 		return $ok !== false ? $builder : $builder->whereRaw('1 = 0');
 	}
 	
+	public static function boot() {
+		parent::boot();
+		
+		self::_registerCreatingPermissions();
+		self::_registerUpdatingPermissions();
+		self::_registerDeletingPermissions();
+		
+	}
+	
 	protected function applyPermissionsRules($builder) {
 		$class = get_class($this);
 		
@@ -97,5 +106,66 @@ class AclModel extends Model {
 	protected function getAclKey() {
 		return $this->acl_field_key;
 	}
+
+	protected static function checkCreatingPermissions($model) {
+		
+	}
+
+	protected static function checkUpdatingPermissions($model) {
+		
+	}
+
+	protected static function checkDeletingPermissions($model) {
+		
+	}
 	
+	private function _useAcl() {
+		return $this->use_acl && !self::$enable_acl;
+	}
+
+	private static function _registerCreatingPermissions() {
+		static::creating(function($model) {
+			if($model->_useAcl()) {
+				$class = get_class($model);
+				$id = $model[$this->getAclKey()];
+				return Acl::check($class.'.insert', [$id]);
+			}
+		});
+		static::creating(function($model) {
+			if($model->_useAcl()) {
+				return $this->checkCreatingPermissions($model);
+			}
+		});
+	}
+
+	private static function _registerUpdatingPermissions() {
+		static::updating(function($model) {
+			if($model->_useAcl()) {
+				$class = get_class($model);
+				$id = $model[$this->getAclKey()];
+				return Acl::check($class.'.update', [$id]);
+			}
+		});
+		static::updating(function($model) {
+			if($model->_useAcl()) {
+				return $this->checkCreatingPermissions($model);
+			}
+		});
+	}
+
+	private static function _registerDeletingPermissions() {
+		static::deleting(function($model) {
+			if($model->_useAcl()) {
+				$class = get_class($model);
+				$id = $model[$this->getAclKey()];
+				return Acl::check($class.'.delete', [$id]);
+			}
+		});
+		static::deleting(function($model) {
+			if($model->_useAcl()) {
+				return $this->checkDeletingPermissions($model);
+			}
+		});
+	}
+
 }
