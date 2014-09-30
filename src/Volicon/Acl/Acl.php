@@ -175,6 +175,15 @@ class Acl implements AclResult {
 		$resource = $this->_getResource($resource);
 		$user_id = $this->_getUserId($user);
 		
+		if(!$user_id) {
+			return $result;
+		}
+		
+		if(in_array($resource, $this->allways_allow_resources)) {
+			$result->result = Acl::ALLOWED;
+			return $result;
+		}
+		
 		$roles_ids = $this->getRolesBelongToUsers([$user_id], []);
 		
 		$is_admin = Role::whereIn('role_id', $roles_ids)->where('admin', '=', true)->get()->count() > 0;
