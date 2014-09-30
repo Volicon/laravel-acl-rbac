@@ -43,7 +43,7 @@ class AclModel extends Model {
 		return true;
 	}
 
-	public function addWhere($model, $type) {
+	public function addWhere($model) {
 		return true;
 	}
 	
@@ -68,11 +68,34 @@ class AclModel extends Model {
 	public function newQuery() {
 		$builder = parent::newQuery();
 		
-		if($this->isCalledFromBuilder()) {
+		if(!$this->use_acl || !self::$enable_acl) {
 			return $builder;
 		}
 		
-		return AclBuilder::toAclBuilder($builder);
+		$this->applyPermissionsRules($builder);
+		
+		$ok = $this->addWhere($builder);
+		
+		return $ok !== false ? $builder : $builder->whereRaw('1 = 0');
+	}
+	
+	protected function applyPermissionsRules($builder) {
+		$class = get_class($this);
+		
+		if($class == 'User') {//bug to fix, use to login
+			return;
+		}
+		
+		$result = Acl::addWhere($class.'.select', $builder, $this->getAclKey());
+		
+		if(!$result) {
+			$builder->whereRaw('1 = 0');
+		}
+		
+	}
+	
+	protected function getAclKey() {
+		return $this->acl_field_key;
 	}
 
 	public static function __callStatic($name, $arguments) {
