@@ -26,28 +26,14 @@ class AclModel extends Model {
 			self::$enable_acl = FALSE;
 		}
 		
-		$this->check_parms($attributes);
-		
 		parent::__construct($attributes);
 		
 		if(!$this->acl_field_key && $this->getKeyName()) {
 			$this->acl_field_key = $this->getKeyName();
 		}
 	}
-	
-	protected function check_parms($attributes = []) {
-		if(count($attributes) && !$this->checkParams($attributes)) {
-			throw New Exception("Wrong attrinutes for ".get_class($this)." args:".print_r($attributes, 1));
-		}
-		
-		return true;
-	}
 
 	public function addWhere($model) {
-		return true;
-	}
-	
-	public function checkParams(array $params) {
 		return true;
 	}
 	
