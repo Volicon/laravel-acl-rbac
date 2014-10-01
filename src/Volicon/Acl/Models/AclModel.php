@@ -1,7 +1,6 @@
 <?php namespace Volicon\Acl\Models;
 
 use \Illuminate\Database\Eloquent\Model;
-use \Illuminate\Support\Collection;
 
 //use Volicon\Acl\Facades\Acl;
 use Acl;
@@ -113,8 +112,8 @@ class AclModel extends Model {
 		static::creating(function($model) {
 			if($model->isUsingAcl()) {
 				$class = get_class($model);
-				$id = $model[$model->getAclKey()];
-				return Acl::check($class.'.insert', [$id]);
+				$result = Acl::check($class.'.insert');
+				return $result;
 			}
 		});
 		static::creating(function($model) {
