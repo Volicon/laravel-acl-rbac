@@ -117,8 +117,7 @@ class Acl implements AclResult {
 			
 			if($perm->allowed) {
 				if(!count($values_arr)) {
-					$result->result = Acl::ALLOWED;
-					break;
+					return true;
 				}
 				
 				if(array_key_exists($perm->value, $values_arr)) {
