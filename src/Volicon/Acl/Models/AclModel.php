@@ -106,14 +106,14 @@ class AclModel extends Model {
 	}
 	
 	final public function isUsingAcl() {
-		return $this->use_acl && !self::$enable_acl;
+		return $this->use_acl && self::$enable_acl;
 	}
 
 	private static function _registerCreatingPermissions() {
 		static::creating(function($model) {
 			if($model->isUsingAcl()) {
 				$class = get_class($model);
-				$id = $model[$this->getAclKey()];
+				$id = $model[$model->getAclKey()];
 				return Acl::check($class.'.insert', [$id]);
 			}
 		});
@@ -128,7 +128,7 @@ class AclModel extends Model {
 		static::updating(function($model) {
 			if($model->isUsingAcl()) {
 				$class = get_class($model);
-				$id = $model[$this->getAclKey()];
+				$id = $model[$model->getAclKey()];
 				return Acl::check($class.'.update', [$id]);
 			}
 		});
@@ -143,7 +143,7 @@ class AclModel extends Model {
 		static::deleting(function($model) {
 			if($model->isUsingAcl()) {
 				$class = get_class($model);
-				$id = $model[$this->getAclKey()];
+				$id = $model[$model->getAclKey()];
 				return Acl::check($class.'.delete', [$id]);
 			}
 		});
