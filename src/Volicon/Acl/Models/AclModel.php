@@ -1,7 +1,7 @@
 <?php namespace Volicon\Acl\Models;
 
 use \Illuminate\Database\Eloquent\Model;
-
+use Volicon\Acl\Exceptions\NoPermissionsException;
 //use Volicon\Acl\Facades\Acl;
 use Acl;
 use App;
@@ -113,12 +113,19 @@ class AclModel extends Model {
 			if($model->isUsingAcl()) {
 				$class = get_class($model);
 				$result = Acl::check($class.'.insert');
+				if(!$result) {
+					throw new NoPermissionsException("No Permission to create $class");
+				}
 				return $result;
 			}
 		});
 		static::creating(function($model) {
 			if($model->isUsingAcl()) {
-				return $this->checkCreatingPermissions($model);
+				$result = $this->checkCreatingPermissions($model);
+				if(!$result) {
+					throw new NoPermissionsException("No Permission to create $class");
+				}
+				return $result;
 			}
 		});
 	}
@@ -128,12 +135,20 @@ class AclModel extends Model {
 			if($model->isUsingAcl()) {
 				$class = get_class($model);
 				$id = $model[$model->getAclKey()];
-				return Acl::check($class.'.update', [$id]);
+				$result = Acl::check($class.'.update', [$id]);
+				if(!$result) {
+					throw new NoPermissionsException("No Permission to update $class id:".$id);
+				}
+				return $result;
 			}
 		});
 		static::updating(function($model) {
 			if($model->isUsingAcl()) {
-				return $this->checkCreatingPermissions($model);
+				$result = $this->checkCreatingPermissions($model);
+				if(!$result) {
+					throw new NoPermissionsException("No Permission to update $class id:".$id);
+				}
+				return $result;
 			}
 		});
 	}
@@ -143,12 +158,20 @@ class AclModel extends Model {
 			if($model->isUsingAcl()) {
 				$class = get_class($model);
 				$id = $model[$model->getAclKey()];
-				return Acl::check($class.'.delete', [$id]);
+				$result = Acl::check($class.'.delete', [$id]);
+				if(!$result) {
+					throw new NoPermissionsException("No Permission to delete $class id:".$id);
+				}
+				return $result;
 			}
 		});
 		static::deleting(function($model) {
 			if($model->isUsingAcl()) {
-				return $this->checkDeletingPermissions($model);
+				$result = $this->checkDeletingPermissions($model);
+				if(!$result) {
+					throw new NoPermissionsException("No Permission to delete $class id:".$id);
+				}
+				return $result;
 			}
 		});
 	}
