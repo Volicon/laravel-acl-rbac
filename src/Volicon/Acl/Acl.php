@@ -42,7 +42,7 @@ class Acl implements AclResult {
 	 */
 	public function check($resource = null, array $additional_values = [], $user_id = null) {
 		
-		$default_permission = \Config::get("acl::config.default_permission");
+		$default_permission = \Config::get("acl::config.default_permission") ? true : false;
 		
 		if(!$this->_guard) {
 			return true;
