@@ -9,6 +9,8 @@ use Volicon\Acl\Models\UserRole;
 use Volicon\Acl\Models\RolePermission;
 use Volicon\Acl\Models\GroupResources;
 
+use Acl;
+
 class UpdateCommand extends Command {
 	
 	protected $name = 'acl:update';
@@ -34,6 +36,8 @@ class UpdateCommand extends Command {
 		}
 		
 		$this->updateResorces($group_resources_map, $group_resources);
+		
+		$this->updateRolesResources();
 		
 		if($updateRolesOpt && count($role_permissions)) {
 			
@@ -109,6 +113,17 @@ class UpdateCommand extends Command {
 				'resource'	=> $resource
 			));
 		}
+		\Eloquent::reguard();
+	}
+
+	public function updateRolesResources() {
+		$roles = Acl::getRoles();
+		\Eloquent::unguard();
+		Acl::unguard();
+		foreach($roles as $role) {
+			Acl::updateRole($role['role_id'], $role);
+		}
+		Acl::reguard();
 		\Eloquent::reguard();
 	}
 

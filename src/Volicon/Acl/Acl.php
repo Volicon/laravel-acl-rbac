@@ -7,6 +7,7 @@ use Volicon\Acl\Models\UserRole;
 
 use Illuminate\Support\Facades\Config;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use \Illuminate\Support\Collection;
 
 use InvalidArgumentException;
 
@@ -309,6 +310,8 @@ class Acl implements AclResult {
 		if(!$roleId) {
 			return false;
 		}
+		
+		$permissions = $this->addSubResources($permissions);
 			
 		
 		/* delete all permissions for given role id*/
@@ -770,6 +773,9 @@ class Acl implements AclResult {
 		
 		foreach($this->group_resources as $group_name=>$resources) {
 			foreach($resources as $route) {
+				if(is_array($route)) {
+					continue;
+				}
 				$result[$route] = array_search($group_name, $group_resources_ids);
 			}
 		}
@@ -892,6 +898,51 @@ class Acl implements AclResult {
 			return $permission2;
 		}
 		
+	}
+
+	protected function addSubResources($permissions) {
+		
+		$result = (new Collection($permissions))->keyBy('resource');
+		
+		$sub_resources = [];
+		$dependent_resources = [];
+		
+		foreach ($permissions as $permission) {
+			$resource = $permission['resource'];
+			$config_permission_options = $this->group_resources[$resource];
+			if(!$config_permission_options) {
+				continue;
+			}
+			$permission_options = isset($config_permission_options['@options']) ? $config_permission_options['@options'] : [];
+			
+			if(!isset($permission_options['depend'])) {$permission_options['depend'] = [];}
+			if(!isset($permission_options['sub_resource'])) {$permission_options['sub_resource'] = false;}
+			
+			if($permission_options['sub_resource']) {
+				$sub_resources[] = $resource;
+			} else if(count($permission_options['depend'])) {
+				$dependent_resources = array_merge($dependent_resources, $permission_options['depend']);
+			}
+		}
+		
+		foreach($sub_resources as $resource) {
+			if(!in_array($resource, $dependent_resources)
+				&& !count($result[$resource]['values'])){
+				unset($result[$resource]);
+			}
+		}
+		
+		foreach($dependent_resources as $resource) {
+			if(!isset($result[$resource])) {
+				$result[$resource] = [
+					'resource' => $resource,
+					'values' => [],
+					'allowed' => true
+				];
+			}
+		}
+		
+		return $result->values()->toArray();
 	}
 
 }
