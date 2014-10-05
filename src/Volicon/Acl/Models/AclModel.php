@@ -53,7 +53,7 @@ class AclModel extends Model {
 	public function newQuery() {
 		$builder = parent::newQuery();
 		
-		if(!$this->use_acl || !self::$enable_acl) {
+		if(!$this->isUsingAcl()) {
 			return $builder;
 		}
 		
