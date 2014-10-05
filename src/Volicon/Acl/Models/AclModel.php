@@ -83,7 +83,8 @@ class AclModel extends Model {
 		$result = Acl::addWhere($class.'.select', $builder, $this->getAclKey());
 		
 		if(!$result) {
-			$builder->whereRaw('1 = 0');
+			throw new NoPermissionsException("No perrmision to select $class");
+			//$builder->whereRaw('1 = 0');
 		}
 		
 	}
