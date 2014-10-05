@@ -654,11 +654,11 @@ class Acl implements AclResult {
 		$check = $this->checkForWhere($resource);
 		if($check->result == Acl::ALLOWED) {return true; }
 		if($check->result == Acl::DISALLOW) {return false; }
- 
+		
 		if($check->include) {
-			$model->whereIn($db_field, $check->values);
+			$model->whereIn($model->getModel()->getTable() .'.' .$db_field, $check->values);
 		} else {
-			$model->whereNotIn($db_field, $check->values);
+			$model->whereNotIn($model->getModel()->getTable() .'.' .$db_field, $check->values);
 		}
 		
 		return true;
