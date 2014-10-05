@@ -651,6 +651,10 @@ class Acl implements AclResult {
 			throw new InvalidArgumentException('Argument 2 passed to Volicon\Acl\Acl::addWhere() must be an instance of Illuminate\Database\Eloquent\Builder or any derived class, '.  (is_null($model) ? 'NULL' : 'instance of '.get_class($model)).' given');
 		}
 		
+		if(in_array($resource, $this->allways_allow_resources)) {
+			return true;
+		}
+		
 		$check = $this->checkForWhere($resource);
 		if($check->result == Acl::ALLOWED) {return true; }
 		if($check->result == Acl::DISALLOW) {return false; }
