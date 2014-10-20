@@ -47,7 +47,13 @@ return array(
 	/**
 	 * what is the default permission
 	 */
-	'default_permission' => Acl::DISALLOW
+	'default_permission' => false,
+	
+	
+	'roleProviders' => [
+		0 => '\Volicon\Acl\RoleProviders\UsersRoleProvider',
+		1 => '\Volicon\Acl\RoleProviders\AdminRoleProvider'
+	]
 	
 );
 

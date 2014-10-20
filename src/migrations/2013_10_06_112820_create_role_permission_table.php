@@ -16,9 +16,8 @@ class CreateRolePermissionTable extends Migration {
 		{
 			$table->unsignedInteger('role_id');
 			$table->unsignedInteger('permission_id');
-			$table->text('value')->nullable();
+			$table->text('values')->nullable();
 			$table->boolean('allowed');
-			$table->timestamps();
 		});
 	}
 
