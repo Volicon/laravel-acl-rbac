@@ -18,9 +18,6 @@ class AclUser {
 		$users = User::all();
 		$usersRoles = UserRole::all(['user_id', 'role_id'])->groupBy('user_id');
 		foreach($users as &$user) {
-			if(isset($usersRoles[$user->user_id]) && !is_array($usersRoles[$user->user_id])) {
-				die(get_class($usersRoles[$user->user_id]));
-			}
 			$user->roles = isset($usersRoles[$user->user_id]) ? array_pluck($usersRoles[$user->user_id], 'role_id') : [];
 			$user->user_types = static::getUserTypes($user);
 		}
