@@ -23,4 +23,6 @@ interface AclInterface {
 	public function reguard();
 	public function unguard();
 	public function isGuard();
+	public function getRoleProvider($role_type);
+	public function getRoles($roleIds = []);
 }
