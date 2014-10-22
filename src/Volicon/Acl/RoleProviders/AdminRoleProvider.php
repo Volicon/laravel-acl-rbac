@@ -42,6 +42,8 @@ class AdminRoleProvider extends AclRoleProvider {
 			}
 		}
 		
+		$role->permissions = [];
+		
 		return parent::addRole ( $role );
 	}
 	public function updateRole(AclRole $role) {
@@ -51,6 +53,8 @@ class AdminRoleProvider extends AclRoleProvider {
 				return new NoPermissionsException ( 'Only admin user can update admin roles' );
 			}
 		}
+		
+		$role->permissions = [];
 		
 		return parent::updateRole ( $role );
 	}
