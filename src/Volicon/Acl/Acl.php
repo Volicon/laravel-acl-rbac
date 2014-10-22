@@ -159,8 +159,7 @@ class Acl implements AclInterface {
 	}
 	
 	public function updateUserRoles($user_id, $roleIds = []) {
-		
-		UserRole::where('user_id', '=', $user_id)->delete();
+		UserRole::where('user_id', '=', $user_id)->whereNotIn('role_id', $roleIds)->delete();
 		
 		$roles = $this->getRoles($roleIds);
 		/* @var $role \Volicon\Acl\Role */

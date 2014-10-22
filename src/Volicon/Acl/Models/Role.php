@@ -118,12 +118,12 @@ class Role extends \Eloquent {
 			throw new NoPermissionsException("You cannot remove default role.");
 		}
 		
-		$dbRole->permissions()->forceDelete();
-		$dbRole->users()->forceDelete();
+		$dbRole->permissions()->delete();
+		$dbRole->users()->delete();
 		
 		//TODO: bug in laravel, all roles are deleted and not only 
 		//$dbRole->forceDelete();
-		static::where('role_id', '=', $dbRole->role_id)->delete();
+		$dbRole->delete();
 		
 		return $roleId;
 	}
