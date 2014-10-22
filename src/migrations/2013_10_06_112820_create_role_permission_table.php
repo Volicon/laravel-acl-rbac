@@ -18,6 +18,8 @@ class CreateRolePermissionTable extends Migration {
 			$table->unsignedInteger('permission_id');
 			$table->text('values')->nullable();
 			$table->boolean('allowed');
+			
+			$table->primary(['role_id', 'permission_id']);
 		});
 	}
 
