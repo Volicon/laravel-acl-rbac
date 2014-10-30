@@ -60,11 +60,11 @@ class AclUser {
 	
 	public static function getAuthUser() {
 		
-		if(self::$authUser) {
+		$user = Auth::check() ? Auth::getUser() : null;
+		
+		if($user && self::$authUser && $user->user_id === self::$authUser->user_id) {
 			return self::$authUser;
 		}
-		
-		$user = Auth::getUser();
 		
 		if(!$user) {
 			return NULL;
