@@ -50,10 +50,12 @@ class RolePermission extends \Eloquent {
 					'allowed'		=> $perm->allowed
 				]);
 			} else {
-				$rp = $db_role_perm[$perm->permission_id];
-				$rp->values = json_encode($perm->values);
-				$rp->allowed = $perm->allowed;
-				$rp->save();
+				RolePermission::where('role_id', '=', $role->role_id)
+						->where('permission_id', '=', $perm->permission_id)
+						->update([
+							'values'	=> json_encode($perm->values),
+							'allowed'	=> $perm->allowed
+						]);
 			}
 		}
 		
