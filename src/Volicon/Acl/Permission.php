@@ -1,9 +1,6 @@
 <?php namespace Volicon\Acl;
 
-use ArrayAccess;
-use JsonSerializable;
-use Illuminate\Support\Contracts\JsonableInterface;
-use Illuminate\Support\Contracts\ArrayableInterface;
+use Volicon\Acl\Models\VirtualModel;
 use Config;
 use InvalidArgumentException;
 use Volicon\Acl\Models\GroupResources;
@@ -13,12 +10,11 @@ use Volicon\Acl\Models\GroupResources;
  *
  * @author nadav.v
  */
-class Permission implements ArrayAccess, ArrayableInterface, JsonableInterface, JsonSerializable {
+class Permission extends VirtualModel {
 	
-	public $resource;
-	public $values = [];
-	public $allowed;
 	public function __construct($resource, $values = [], $allowed = null) {
+		
+		$data = [];
 		
 		$default_permission = Config::get ( "acl::config.default_permission" );
 		
@@ -39,28 +35,30 @@ class Permission implements ArrayAccess, ArrayableInterface, JsonableInterface, 
 					throw new InvalidArgumentException('permission id do not have resource: '.$resource->permission_id);
 				}
 				
-				$this->resource = $group_resources[$resource->permission_id];
+				$data['resource'] = $group_resources[$resource->permission_id];
 			} else {
-				$this->resource = $resource->resource;
+				$data['resource'] = $resource->resource;
 			}
 			
 			if(isset($resource->values)) {
 				if(is_array($resource->values)) {
-					$this->values = $resource->values;
+					$data['values'] = $resource->values;
 				} else if(is_string($resource->values)) {
-					$this->values = json_decode($resource->values);
+					$data['values'] = json_decode($resource->values);
 				}
 			}
 			
-			$this->allowed = !isset($resource->allowed) || is_null ( $resource->allowed ) ? $default_permission : (bool)$resource->allowed;
+			$data['allowed'] = !isset($resource->allowed) || is_null ( $resource->allowed ) ? $default_permission : (bool)$resource->allowed;
 		} else {
 		
-			$this->resource = $resource;
-			$this->values = $values;
+			$data['resource'] = $resource;
+			$data['values'] = $values;
 		
 		
-			$this->allowed = is_null ( $allowed ) || ! is_bool ( $allowed ) ? $default_permission : $allowed;
+			$data['allowed'] = is_null ( $allowed ) || ! is_bool ( $allowed ) ? $default_permission : $allowed;
 		}
+		
+		parent::__construct($data);
 	}
 	public function mergePermission(Permission $permission) {
 		
@@ -115,36 +113,8 @@ class Permission implements ArrayAccess, ArrayableInterface, JsonableInterface, 
 		return $this->allowed && !$this->values;
 	}
 
-	public function jsonSerialize() {
-		return $this->toArray();
-	}
-
-	public function offsetExists($offset) {
-		return isset($this->$offset);
-	}
-
-	public function offsetGet($offset) {
-		return $this->$offset;
-	}
-
-	public function offsetSet($offset, $value) {
-		$this->$offset = $value;
-	}
-
 	public function offsetUnset($offset) {
 		throw new \Exception();
-	}
-
-	public function toArray() {
-		return [
-			'resource'	=> $this->resource,
-			'values'	=> $this->values,
-			'allowed'	=> $this->allowed
-		];
-	}
-
-	public function toJson($options = 0) {
-		return json_encode($this, $options);
 	}
 
 }

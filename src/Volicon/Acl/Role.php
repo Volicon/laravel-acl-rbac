@@ -3,10 +3,7 @@
 use Volicon\Acl\Facades\Acl as AclFacade;
 use Volicon\Acl\Exceptions\NoPermissionsException;
 
-use ArrayAccess;
-use JsonSerializable;
-use Illuminate\Support\Contracts\JsonableInterface;
-use Illuminate\Support\Contracts\ArrayableInterface;
+use Volicon\Acl\Models\VirtualModel;
 use Illuminate\Support\Collection;
 
 /**
@@ -21,10 +18,7 @@ use Illuminate\Support\Collection;
  * @property Collection $permissions
  * @property Collection $users users ID's
  */
-class Role implements ArrayAccess, ArrayableInterface, JsonableInterface, JsonSerializable {
-	
-	protected $attributes = [];
-
+class Role extends VirtualModel {
 
 	public function __construct($role) {
 		
@@ -100,18 +94,6 @@ class Role implements ArrayAccess, ArrayableInterface, JsonableInterface, JsonSe
 		return $role_provider->removeRole($this->attributes['role_id']);
 	}
 
-	public function jsonSerialize() {
-		return $this->toArray();
-	}
-
-	public function offsetExists($offset) {
-		return isset($this->attributes[$offset]);
-	}
-
-	public function offsetGet($offset) {
-		return $this->attributes[$offset];
-	}
-
 	public function offsetSet($offset, $value) {
 		
 		if($offset === 'default') {
@@ -138,8 +120,8 @@ class Role implements ArrayAccess, ArrayableInterface, JsonableInterface, JsonSe
 			
 			$this->attributes['users'] = $this->_aclUsers($value);
 			
-		} else {		
-			$this->attributes[$offset] = $value;
+		} else {
+			parent::offsetSet($offset, $value);
 		}
 		
 	}
@@ -150,28 +132,8 @@ class Role implements ArrayAccess, ArrayableInterface, JsonableInterface, JsonSe
 			throw new NoPermissionsException("No permission to unset: ".$offset);
 		}
 		
-		unset($this->attributes[$offset]);
+		parent::offsetUnset($offset);
 		
-	}
-
-	public function toArray() {
-		return $this->attributes;
-	}
-
-	public function toJson($options = 0) {
-		return json_encode($this, $options);
-	}
-	
-	public function __get($name) {
-		return $this->offsetGet($name);
-	}
-	
-	public function __set($name, $value) {
-		$this->offsetSet($name, $value);
-	}
-	
-	public function __isset($name) {
-		return isset($this->attributes[$name]);
 	}
 
 	protected function _aclPermissions($permissions) {
