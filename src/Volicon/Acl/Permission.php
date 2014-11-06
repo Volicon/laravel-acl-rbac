@@ -9,6 +9,9 @@ use Volicon\Acl\Models\GroupResources;
  * Description of Permission
  *
  * @author nadav.v
+ * @property string $resource
+ * @property array $values array of ids
+ * @property boolean $allowed exclude\include of ids, if ids are empty, it is allow all/exclude all
  */
 class Permission extends VirtualModel {
 	

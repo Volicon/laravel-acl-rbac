@@ -21,6 +21,8 @@ class Acl implements AclInterface {
 	protected $route_resources_in_group = [ ];
 	protected $allways_allow_resources = [ ];
 	protected $registersRoleProviders = [ ];
+	protected $registersHooks = [ ];
+	
 	public function __construct() {
 		
 		$this->group_resources = Config::get ( 'acl::config.group_resources' );
@@ -86,10 +88,19 @@ class Acl implements AclInterface {
 		}
 		
 		$this->registersRoleProviders [$role_type] = $roleProvider;
-		
 		$roleProvider->setRoleType($role_type);
+		$this->registersHooks[$role_type] = [];
 		
 	}
+	
+	public function registerHook($resource, $callback) {
+		if(!isset($this->registersHooks[$resource])) {
+			$this->registersHooks[$resource] = [];
+		}
+		
+		$this->registersHooks[$resource][] = $callback;
+	}
+
 	public function getPermission($resource) {
 		
 		if(! $this->_guard) {
@@ -111,24 +122,22 @@ class Acl implements AclInterface {
 		}
 		
 		if(isset($authUser->permissions[$resource])) {
-			return $authUser->permissions[$resource];
+			return $this->_applyHook($authUser->permissions[$resource]);
 		}
 		
 		$result = new Permission ( $resource );
-		$user_id = $authUser->user_id;
-		$aclUser = AclUser::getUser ( $user_id );
-		foreach ( $aclUser->types as $type ) {
+		foreach ( $authUser->types as $type ) {
 			if (isset ( $this->registersRoleProviders [$type] )) {
 				$permission = $this->registersRoleProviders [$type]->getPermission ( $resource );
 				$result = $result->mergePermission ( $permission );
 			}
 			
 			if($result->isAllowAll()) {
-				return $permission;
+				break;
 			}
 		}
 		
-		return $result;
+		return $this->_applyHook($result);
 	}
 	
 	public function reguard() {
@@ -146,6 +155,10 @@ class Acl implements AclInterface {
 		return $this->registersRoleProviders[$role_type];
 	}
 	
+	public function getRoleProvidersTypes() {
+		return array_keys($this->registersRoleProviders);
+	}
+
 	public function getRoles($roleIds = []) {
 		$result = new Collection();
 		
@@ -172,5 +185,20 @@ class Acl implements AclInterface {
 			$role->update();
 		}
 	}
-	
+
+	private function _applyHook(Permission $permission) {
+		if(!isset($this->registersHooks[$permission->resource])) {
+			return $permission;
+		}
+		
+		foreach ($this->registersHooks[$permission->resource] as $callback) {
+			$handler_result = $callback($permission);
+			if($handler_result instanceof Permission) {
+				$permission = $permission->mergePermission($handler_result);
+			}
+		}
+		
+		return $permission;
+	}
+
 }

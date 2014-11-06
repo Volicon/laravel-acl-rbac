@@ -59,9 +59,6 @@ abstract class AclRoleProvider {
 		
 		return $result;
 	}
-	
-	public function registerResourceHandler($resource, $callback) {
-	}
 
 	protected function addSubResources($permissions) {
 		$result = $permissions->keyBy ( 'resource' );
