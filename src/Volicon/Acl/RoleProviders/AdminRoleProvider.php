@@ -1,7 +1,6 @@
 <?php namespace Volicon\Acl\RoleProviders;
 
 use Volicon\Acl\Permission;
-use Volicon\Acl\Models\AclUser;
 use Volicon\Acl\Models\Role;
 use Volicon\Acl\Role as AclRole;
 use Volicon\Acl\Exceptions\NoPermissionsException;
@@ -36,7 +35,7 @@ class AdminRoleProvider extends AclRoleProvider {
 	public function addRole(AclRole $role) {
 		
 		if(Acl::isGuard()) {
-			$authUser = AclUser::getUser ( Auth::getUser ()->user_id );
+			$authUser = AclUser::find ( Auth::getUser ()->user_id );
 			if (! in_array ( $this->role_type, $authUser->types )) {
 				return new NoPermissionsException ( 'Only admin user can add admin roles' );
 			}
@@ -48,7 +47,7 @@ class AdminRoleProvider extends AclRoleProvider {
 	}
 	public function updateRole(AclRole $role) {
 		if(Acl::isGuard()) {
-			$authUser = AclUser::getUser ( Auth::getUser ()->user_id );
+			$authUser = AclUser::find ( Auth::getUser ()->user_id );
 			if (! in_array ( $this->role_type, $authUser->types )) {
 				return new NoPermissionsException ( 'Only admin user can update admin roles' );
 			}
@@ -60,7 +59,7 @@ class AdminRoleProvider extends AclRoleProvider {
 	}
 	public function removeRole($roleId) {
 		if(Acl::isGuard()) {
-			$authUser = AclUser::getUser ( Auth::getUser ()->user_id );
+			$authUser = AclUser::find ( Auth::getUser ()->user_id );
 			if (! in_array ( $this->role_type, $authUser->types )) {
 				return new NoPermissionsException ( 'Only admin user can remove admin roles' );
 			}

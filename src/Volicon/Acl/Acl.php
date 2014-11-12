@@ -2,11 +2,11 @@
 
 use Volicon\Acl\Interfaces\AclInterface;
 use Volicon\Acl\RoleProviders\AclRoleProvider;
-use Volicon\Acl\Models\AclUser;
 use Volicon\Acl\Models\GroupResources;
 use Volicon\Acl\Models\UserRole;
 use Illuminate\Support\Facades\Config;
 use \Illuminate\Support\Collection;
+use Auth;
 
 /**
  * Description of Acl
@@ -111,7 +111,7 @@ class Acl implements AclInterface {
 			return new Permission($resource, [], true);
 		}
 		
-		$authUser = AclUser::getAuthUser();
+		$authUser = AclUser::findWithPermissions(Auth::getUser()->user_id);
 		if(!$authUser) {
 			return new Permission($resource, [], false);
 		}
