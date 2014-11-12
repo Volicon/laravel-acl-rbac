@@ -126,7 +126,7 @@ class Acl implements AclInterface {
 		}
 		
 		$result = new Permission ( $resource );
-		foreach ( $authUser->types as $type ) {
+		foreach ( $authUser->user_types as $type ) {
 			if (isset ( $this->registersRoleProviders [$type] )) {
 				$permission = $this->registersRoleProviders [$type]->getPermission ( $resource );
 				$result = $result->mergePermission ( $permission );
