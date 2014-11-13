@@ -29,6 +29,35 @@ class GroupResources extends \Eloquent {
 		return new Collection(self::$group_resources);
 	}
 	
+	public static function getDependentGroupsResources() {
+		$config_group_resources = Config::get('acl::config.group_resources');
+		$result = [];
+		
+		$func_data = function(&$data) {
+			if(!isset ( $data ['@options'] )) {
+				$data ['@options'] = [];
+			}
+			
+			if(!isset ( $data ['@options']['depend'] )) {
+				$data ['@options']['depend'] = [];
+			}
+			
+			if(!isset ( $data ['@options']['sub_resource'] )) {
+				$data ['@options']['sub_resource'] = false;
+			}
+		};
+		
+		foreach($config_group_resources as $group=>$data) {
+			$func_data($data);
+			if(!$data['@options']['sub_resource']) {
+				$result[$group] = [];
+				self::_build_dependent_group_resources($result[$group], $group);
+			}
+		}
+		
+		return $result;
+	}
+
 	public static function getResourceGroup($resource) {
 		if(in_array($resource, self::$group_resources)) {
 			return $resource;
@@ -54,6 +83,38 @@ class GroupResources extends \Eloquent {
 				}
 				self::$resources_in_groups[$resource] = $group;
 			}
+		}
+	}
+	
+	private static function _get_config_group ($resource) {
+		$group_resources = Config::get('acl::config.group_resources');
+		$data = $group_resources[$resource];
+		
+		if(!is_array($data)) {
+			return NULL;
+		}
+		
+		if(!isset ( $data ['@options'] )) {
+			$data ['@options'] = [];
+		}
+
+		if(!isset ( $data ['@options']['depend'] )) {
+			$data ['@options']['depend'] = [];
+		}
+
+		if(!isset ( $data ['@options']['sub_resource'] )) {
+			$data ['@options']['sub_resource'] = false;
+		}
+		
+		return $data;
+	}
+	
+	private static function _build_dependent_group_resources(&$result, $resource) {
+		$config_group = self::_get_config_group($resource);
+		$sub_resources = $config_group['@options']['depend'];
+		foreach($sub_resources as $sub_resource) {
+			$result[] = $sub_resource;
+			self::_build_dependent_group_resources($result, $sub_resource);
 		}
 	}
 	

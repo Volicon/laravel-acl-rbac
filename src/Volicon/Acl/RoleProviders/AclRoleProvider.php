@@ -3,7 +3,7 @@
 use Volicon\Acl\Permission;
 use Volicon\Acl\Models\Role;
 use Volicon\Acl\Role as AclRole;
-use Illuminate\Support\Collection;
+use Volicon\Acl\Models\GroupResources;
 use Exception;
 use Config;
 
@@ -67,6 +67,8 @@ abstract class AclRoleProvider {
 		$dependent_resources = [ ];
 		$group_resources = Config::get('acl::group_resources', []);
 		
+		$dependent_group_resources = GroupResources::getDependentGroupsResources();
+		
 		foreach ( $permissions as $permission ) {
 			$resource = $permission ['resource'];
 			if (! isset($group_resources[$resource])) {
@@ -85,7 +87,7 @@ abstract class AclRoleProvider {
 			if ($permission_options ['sub_resource']) {
 				$sub_resources [] = $resource;
 			} else if (count ( $permission_options ['depend'] )) {
-				$dependent_resources = array_merge ( $dependent_resources, $permission_options ['depend'] );
+				$dependent_resources = array_merge ( $dependent_resources, $dependent_group_resources[$permission->resource]);
 			}
 		}
 		

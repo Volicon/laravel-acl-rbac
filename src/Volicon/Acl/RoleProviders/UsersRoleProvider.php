@@ -1,6 +1,7 @@
 <?php namespace Volicon\Acl\RoleProviders;
 
 use Volicon\Acl\Permission;
+use Volicon\Acl\AclUser;
 use Auth;
 
 /**

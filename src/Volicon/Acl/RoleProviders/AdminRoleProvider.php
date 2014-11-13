@@ -3,6 +3,7 @@
 use Volicon\Acl\Permission;
 use Volicon\Acl\Models\Role;
 use Volicon\Acl\Role as AclRole;
+use Volicon\Acl\AclUser;
 use Volicon\Acl\Exceptions\NoPermissionsException;
 use Volicon\Acl\Facades\Acl;
 use Volicon\Acl\Models\GroupResources;
