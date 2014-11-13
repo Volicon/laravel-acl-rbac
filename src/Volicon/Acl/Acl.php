@@ -171,6 +171,14 @@ class Acl implements AclInterface {
 		return $result;
 	}
 	
+	public function getAuthUser() {
+		if(!Auth::check()) {
+			return NULL;
+		}
+		
+		return AclUser::findWithPermissions(Auth::getUser()->user_id);
+	}
+
 	public function updateUserRoles($user_id, $roleIds = []) {
 		if($roleIds) {
 			UserRole::where('user_id', '=', $user_id)->whereNotIn('role_id', $roleIds)->delete();
