@@ -22,6 +22,7 @@ class Acl implements AclInterface {
 	protected $allways_allow_resources = [ ];
 	protected $registersRoleProviders = [ ];
 	protected $registersHooks = [ ];
+	private $auth_user = null;
 	
 	public function __construct() {
 		
@@ -111,7 +112,7 @@ class Acl implements AclInterface {
 			return new Permission($resource, [], true);
 		}
 		
-		$authUser = AclUser::findWithPermissions(Auth::getUser()->user_id);
+		$authUser = $this->getAuthUser();
 		if(!$authUser) {
 			return new Permission($resource, [], false);
 		}
@@ -176,7 +177,17 @@ class Acl implements AclInterface {
 			return NULL;
 		}
 		
-		return AclUser::findWithPermissions(Auth::getUser()->user_id);
+		if($this->auth_user) {
+			if($this->auth_user->user_id !== Auth::getUser()->user_id) {
+				$this->auth_user = NULL;
+			}
+			
+			return $this->auth_user;
+		}
+		
+		$this->auth_user = AclUser::findWithPermissions(Auth::getUser()->user_id);
+		
+		return $this->auth_user;
 	}
 
 	public function updateUserRoles($user_id, $roleIds = []) {
