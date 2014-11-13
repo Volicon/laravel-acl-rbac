@@ -11,7 +11,7 @@ Add to composer.json:
 
 ```
 "require": {
-		"volicon/acl": "dev-master",
+		"volicon/laravel-acl": "dev-master",
 },
 "minimum-stability": "dev"
 ```
