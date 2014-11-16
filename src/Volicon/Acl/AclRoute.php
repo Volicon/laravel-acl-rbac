@@ -1,4 +1,4 @@
-<?php namespace Volicon\Acl\AclRoute;
+<?php namespace Volicon\Acl;
 
 use Volicon\Acl\Facades\Acl;
 use Volicon\Acl\Exceptions\NoPermissionsException;

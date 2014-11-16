@@ -28,6 +28,9 @@ Add it to the app\config\app.php:
 'aliases' => array(
 
 	'Acl'			  => 'Volicon\Acl\Facades\Acl',
+	'AclUser'         => 'Volicon\Acl\AclUser',
+	'AclRole'         => 'Volicon\Acl\AclRole',
+	'AclRoute'         => 'Volicon\Acl\AclRoute',
 
 )
 
@@ -53,7 +56,11 @@ Route::filter('auth', function()
 	if (Auth::guest()) {
 		return Redirect::to('/login.html');
 	}
-	if(Acl::check()->result == Acl::DISALLOW ) return Response::make ('', 403);
+	try {
+		AclRoute::check();
+	} catch (\Volicon\Acl\Exceptions\NoPermissionsException $ex) {
+		return Response::make (json_encode($ex->getMessage()), 403);
+	}
 });
 ```
 
