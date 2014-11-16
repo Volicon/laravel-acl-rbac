@@ -1,6 +1,6 @@
 <?php namespace Volicon\Acl;
 
-use Volicon\Acl\Facades\Acl;
+use Volicon\Acl\Facades\Acl as AclFacade;
 use Volicon\Acl\Exceptions\NoPermissionsException;
 use Illuminate\Support\Facades\Route;
 
@@ -30,7 +30,7 @@ class AclRoute {
 			}
 		}
 		
-		$result = Acl::check($route_name, $ids);
+		$result = AclFacade::check($route_name, $ids);
 		
 		if(!$result) {
 			$error_message = "No Permission for $route_name";
