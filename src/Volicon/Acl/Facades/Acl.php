@@ -16,7 +16,6 @@ use Illuminate\Support\Facades\Facade;
  * @method bool isGuard()
  * @method \Volicon\Acl\RoleProviders\AclRoleProvider getRoleProvider()
  * @method array getRoles(array $roleIds = [])
- * @method undefined updateUserRoles(int $user_id, array $roleIds = [])
  * 
  */
 class Acl extends Facade {

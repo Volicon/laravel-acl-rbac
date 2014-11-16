@@ -190,21 +190,6 @@ class Acl implements AclInterface {
 		return $this->auth_user;
 	}
 
-	public function updateUserRoles($user_id, $roleIds = []) {
-		if($roleIds) {
-			UserRole::where('user_id', '=', $user_id)->whereNotIn('role_id', $roleIds)->delete();
-		} else {
-			UserRole::where('user_id', '=', $user_id)->delete();
-		}
-		
-		$roles = $this->getRoles($roleIds);
-		/* @var $role \Volicon\Acl\AclRole */
-		foreach($roles as $role) {
-			$role->users[] = $user_id;
-			$role->update();
-		}
-	}
-
 	private function _applyHook(AclPermission $permission) {
 		if(!isset($this->registersHooks[$permission->resource])) {
 			return $permission;

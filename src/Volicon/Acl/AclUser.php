@@ -98,5 +98,21 @@ class AclUser extends VirtualModel {
         
         return $result;
     }
+	
+	public function setRoles(array $roleIds) {
+		if($roleIds) {
+			UserRole::where('user_id', '=', $this->user_id)->whereNotIn('role_id', $roleIds)->delete();
+		} else {
+			UserRole::where('user_id', '=', $this->user_id)->delete();
+			return;
+		}
+		
+		$roles = AclFacade::getRoles($roleIds);
+		/* @var $role \Volicon\Acl\AclRole */
+		foreach($roles as $role) {
+			$role->users[] = $this->user_id;
+			$role->update();
+		}
+	}
     
 }
