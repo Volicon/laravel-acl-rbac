@@ -1,8 +1,8 @@
 <?php namespace Volicon\Acl\RoleProviders;
 
-use Volicon\Acl\Permission;
+use Volicon\Acl\AclPermission;
 use Volicon\Acl\Models\Role;
-use Volicon\Acl\Role as AclRole;
+use Volicon\Acl\AclRole;
 use Volicon\Acl\Models\GroupResources;
 use Exception;
 use Config;
@@ -49,7 +49,7 @@ abstract class AclRoleProvider {
 			return $this->registersHandlers [$resource] ();
 		}
 		
-		$result = new Permission ( $resource );
+		$result = new AclPermission ( $resource );
 		
 		$roles = $this->getRoles([],[$resource]);
 		

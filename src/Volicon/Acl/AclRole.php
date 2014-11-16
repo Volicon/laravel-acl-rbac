@@ -18,7 +18,7 @@ use Illuminate\Support\Collection;
  * @property Collection $permissions
  * @property Collection $users users ID's
  */
-class Role extends VirtualModel {
+class AclRole extends VirtualModel {
 
 	public function __construct($role) {
 		
@@ -64,7 +64,7 @@ class Role extends VirtualModel {
 		
 		$permissions = $this->permissions->keyBy('resource');
 		
-		return isset($permissions[$resource]) ? $permissions[$resource] : new Permission($resource);
+		return isset($permissions[$resource]) ? $permissions[$resource] : new AclPermission($resource);
 	}
 
 	public function add() {
@@ -141,10 +141,10 @@ class Role extends VirtualModel {
 		$result = new Collection();
 			
 		foreach($permissions as $perm) {
-			if($perm instanceof Permission) {
+			if($perm instanceof AclPermission) {
 				$result[] = $perm;
 			} else {
-				$result[] = new Permission($perm);
+				$result[] = new AclPermission($perm);
 			}
 		}
 

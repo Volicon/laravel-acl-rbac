@@ -3,7 +3,7 @@
 use Volicon\Acl\Models\GroupResources;
 use Illuminate\Support\Collection;
 
-use Volicon\Acl\Role as AclRole;
+use Volicon\Acl\AclRole;
 
 class Role extends \Eloquent {
 	protected $table = 'roles';

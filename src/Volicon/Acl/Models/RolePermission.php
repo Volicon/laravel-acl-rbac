@@ -21,7 +21,7 @@ class RolePermission extends \Eloquent {
 		
 		$perm_ids = [];
 		
-		/* @var $perm \Volicon\Acl\Permission */
+		/* @var $perm \Volicon\Acl\AclPermission */
 		foreach($role->permissions as $key=>$perm) {
 			$permission_id = $group_resources->search($perm->resource);
 			$perm_ids[] = $permission_id;

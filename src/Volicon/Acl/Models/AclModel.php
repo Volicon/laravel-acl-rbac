@@ -2,7 +2,7 @@
 
 use \Illuminate\Database\Eloquent\Model;
 use Volicon\Acl\Exceptions\NoPermissionsException;
-use Volicon\Acl\Permission;
+use Volicon\Acl\AclPermission;
 // use Volicon\Acl\Facades\Acl;
 use Acl;
 use App;
@@ -58,11 +58,11 @@ class AclModel extends Model {
 	/**
 	 *
 	 * @param \Illuminate\Database\Eloquent\Builder $builder        	
-	 * @param Permission $permission        	
+	 * @param AclPermission $permission        	
 	 * @param string $field        	
 	 * @return \Illuminate\Database\Eloquent\Builder
 	 */
-	public function wherePermission($builder, Permission $permission, $field = null) {
+	public function wherePermission($builder, AclPermission $permission, $field = null) {
 		if (! $field) {
 			$field = $this->getAclKey ();
 		}

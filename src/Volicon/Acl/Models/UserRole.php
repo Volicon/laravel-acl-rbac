@@ -1,6 +1,6 @@
 <?php namespace Volicon\Acl\Models;
 
-use Volicon\Acl\Role as AclRole;
+use Volicon\Acl\AclRole;
 
 class UserRole extends \Eloquent {
 	protected $table = 'user_role';

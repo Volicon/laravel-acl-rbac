@@ -1,6 +1,6 @@
 <?php namespace Volicon\Acl\RoleProviders;
 
-use Volicon\Acl\Permission;
+use Volicon\Acl\AclPermission;
 use Volicon\Acl\AclUser;
 use Auth;
 
@@ -12,7 +12,7 @@ use Auth;
 class UsersRoleProvider extends AclRoleProvider {
 	
 	public function getPermission($resource) {
-		$result = new Permission($resource);
+		$result = new AclPermission($resource);
 		
 		$authUser = AclUser::find ( Auth::getUser ()->user_id );
 		

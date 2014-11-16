@@ -1,8 +1,8 @@
 <?php namespace Volicon\Acl\RoleProviders;
 
-use Volicon\Acl\Permission;
+use Volicon\Acl\AclPermission;
 use Volicon\Acl\Models\Role;
-use Volicon\Acl\Role as AclRole;
+use Volicon\Acl\AclRole;
 use Volicon\Acl\AclUser;
 use Volicon\Acl\Exceptions\NoPermissionsException;
 use Volicon\Acl\Facades\Acl;
@@ -69,7 +69,7 @@ class AdminRoleProvider extends AclRoleProvider {
 		return parent::removeRole ( $roleId );
 	}
 	public function getPermission($resource) {
-		return new Permission ( $resource, [ ], true );
+		return new AclPermission ( $resource, [ ], true );
 	}
 	public function registerResourceHandler($resource, $callback) {
 		return;

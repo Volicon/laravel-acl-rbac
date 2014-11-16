@@ -13,7 +13,7 @@ use Volicon\Acl\Models\GroupResources;
  * @property array $values array of ids
  * @property boolean $allowed exclude\include of ids, if ids are empty, it is allow all/exclude all
  */
-class Permission extends VirtualModel {
+class AclPermission extends VirtualModel {
 	
 	public function __construct($resource, $values = [], $allowed = null) {
 		
@@ -26,7 +26,7 @@ class Permission extends VirtualModel {
 		}
 		
 		if(is_object($resource)) {
-			/* @var $resource Permission */
+			/* @var $resource AclPermission */
 			if(!(isset($resource->resource) || isset($resource->permission_id))) {
 				throw new InvalidArgumentException('permission must include resource');
 			}
@@ -63,7 +63,7 @@ class Permission extends VirtualModel {
 		
 		parent::__construct($data);
 	}
-	public function mergePermission(Permission $permission) {
+	public function mergePermission(AclPermission $permission) {
 		
 		if($permission->resource !== $this->resource) {
 			throw new \Exception('Resouce not match');

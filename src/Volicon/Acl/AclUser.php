@@ -47,8 +47,8 @@ class AclUser extends VirtualModel {
         
         return new static($user);
     }
-    
-    public static function findWithPermissions($user_id) {
+
+	public static function findWithPermissions($user_id) {
         $user = static::find($user_id);
         
         if(!$user) {
@@ -65,7 +65,7 @@ class AclUser extends VirtualModel {
 				$user_types[] = $role->type;
 			}
 			
-			/* @var $perm \Volicon\Acl\Permission */
+			/* @var $perm \Volicon\Acl\AclPermission */
 			foreach($role->permissions as $perm) {
 				if(!isset($permissions[$perm->resource])) {
 					$permissions[$perm->resource] = $perm;

@@ -3,7 +3,7 @@
 use Illuminate\Console\Command;
 use Illuminate\Support\Facades\Config;
 use Symfony\Component\Console\Input\InputOption;
-use Volicon\Acl\Role;
+use Volicon\Acl\AclRole;
 use Volicon\Acl\Models\UserRole;
 use Volicon\Acl\Models\RolePermission;
 use Volicon\Acl\Models\GroupResources;
@@ -47,15 +47,15 @@ class UpdateCommand extends Command {
 			
 			foreach ( $role_permissions as $role ) {
 				
-				$aclRole = new Role($role);
+				$aclRole = new AclRole($role);
 				$role_name = $role ['name'];
 				
 				if (isset ( $rolesMap [$role_name] )) {
 					$role['role_id'] = $rolesMap [$role_name];
-					$aclRole = new Role($role);
+					$aclRole = new AclRole($role);
 					$aclRole->update();
 				} else {
-					$aclRole = new Role($role);
+					$aclRole = new AclRole($role);
 					$aclRole->add();
 				}
 			}
@@ -119,7 +119,7 @@ class UpdateCommand extends Command {
 		$roles = Acl::getRoles ();
 		\Eloquent::unguard ();
 		Acl::unguard ();
-		/* @var $role \Volicon\Acl\Role */
+		/* @var $role \Volicon\Acl\AclRole */
 		foreach ( $roles as $role ) {
 			$role->update();
 		}

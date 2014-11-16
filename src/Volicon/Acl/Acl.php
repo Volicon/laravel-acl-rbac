@@ -105,16 +105,16 @@ class Acl implements AclInterface {
 	public function getPermission($resource) {
 		
 		if(! $this->_guard) {
-			return new Permission($resource, [], true);
+			return new AclPermission($resource, [], true);
 		}
 		
 		if(in_array($resource, Config::get('acl::allways_allow_resources'))) {
-			return new Permission($resource, [], true);
+			return new AclPermission($resource, [], true);
 		}
 		
 		$authUser = $this->getAuthUser();
 		if(!$authUser) {
-			return new Permission($resource, [], false);
+			return new AclPermission($resource, [], false);
 		}
 		
 		$groupResource = GroupResources::getResourceGroup($resource);
@@ -126,7 +126,7 @@ class Acl implements AclInterface {
 			return $this->_applyHook($authUser->permissions[$resource]);
 		}
 		
-		$result = new Permission ( $resource );
+		$result = new AclPermission ( $resource );
 		foreach ( $authUser->user_types as $type ) {
 			if (isset ( $this->registersRoleProviders [$type] )) {
 				$permission = $this->registersRoleProviders [$type]->getPermission ( $resource );
@@ -198,21 +198,21 @@ class Acl implements AclInterface {
 		}
 		
 		$roles = $this->getRoles($roleIds);
-		/* @var $role \Volicon\Acl\Role */
+		/* @var $role \Volicon\Acl\AclRole */
 		foreach($roles as $role) {
 			$role->users[] = $user_id;
 			$role->update();
 		}
 	}
 
-	private function _applyHook(Permission $permission) {
+	private function _applyHook(AclPermission $permission) {
 		if(!isset($this->registersHooks[$permission->resource])) {
 			return $permission;
 		}
 		
 		foreach ($this->registersHooks[$permission->resource] as $callback) {
 			$handler_result = $callback($permission);
-			if($handler_result instanceof Permission) {
+			if($handler_result instanceof AclPermission) {
 				$permission = $permission->mergePermission($handler_result);
 			}
 		}
