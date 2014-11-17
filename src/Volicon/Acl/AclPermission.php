@@ -1,6 +1,6 @@
 <?php namespace Volicon\Acl;
 
-use Volicon\Acl\Models\VirtualModel;
+use Volicon\Acl\Support\DataObject;
 use Config;
 use InvalidArgumentException;
 use Volicon\Acl\Models\GroupResources;
@@ -13,7 +13,7 @@ use Volicon\Acl\Models\GroupResources;
  * @property array $values array of ids
  * @property boolean $allowed exclude\include of ids, if ids are empty, it is allow all/exclude all
  */
-class AclPermission extends VirtualModel {
+class AclPermission extends DataObject {
 	
 	public function __construct($resource, $values = [], $allowed = null) {
 		

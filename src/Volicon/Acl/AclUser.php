@@ -1,8 +1,12 @@
 <?php namespace Volicon\Acl;
 
-use Volicon\Acl\Models\VirtualModel;
+use Volicon\Acl\Support\DataObject;
 use Volicon\Acl\Models\UserRole;
 use Volicon\Acl\Facades\Acl as AclFacade;
+use Volicon\Acl\Support\AclInterface;
+use Volicon\Acl\Support\AclTrait;
+use Illuminate\Support\Facades\Config;
+use Volicon\Acl\Models\GroupResources;
 use User;
 use InvalidArgumentException;
 use Illuminate\Support\Collection;
@@ -16,7 +20,8 @@ use Illuminate\Support\Collection;
  * @property array roles
  * @property array user_types
  */
-class AclUser extends VirtualModel {
+class AclUser extends DataObject implements AclInterface {
+	use AclTrait;
     
     public function __construct($data) {
         
@@ -114,5 +119,29 @@ class AclUser extends VirtualModel {
 			$role->update();
 		}
 	}
-    
+
+	public function getPermission($resource) {
+		
+		if(in_array($resource, Config::get('acl::allways_allow_resources'))) {
+			return new AclPermission($resource, [], true);
+		}
+		
+		$groupResource = GroupResources::getResourceGroup($resource);
+		if($groupResource) {
+			$resource = $groupResource;
+		}
+		
+		$result = new AclPermission($resource);
+		
+		$aclUser = $this;
+		if(!isset($this->permissions)) {
+			$aclUser = self::find($this->user_id);
+		}
+		
+		if(isset($aclUser->permissions[$resource])) {
+			$result = $aclUser->permissions[$resource];
+		}
+		return AclFacade::applyHook($result, $this);
+	}
+
 }

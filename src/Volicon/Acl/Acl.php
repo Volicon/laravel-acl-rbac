@@ -1,11 +1,11 @@
 <?php namespace Volicon\Acl;
 
-use Volicon\Acl\Interfaces\AclInterface;
+use Volicon\Acl\Support\AclInterface;
+use Volicon\Acl\Support\AclTrait;
 use Volicon\Acl\RoleProviders\AclRoleProvider;
 use Volicon\Acl\Models\GroupResources;
-use Volicon\Acl\Models\UserRole;
 use Illuminate\Support\Facades\Config;
-use \Illuminate\Support\Collection;
+use Illuminate\Support\Collection;
 use Auth;
 
 /**
@@ -14,6 +14,8 @@ use Auth;
  * @author nadav.v
  */
 class Acl implements AclInterface {
+	use AclTrait;
+	
 	public $result = false;
 	public $values_perms = [ ];
 	protected $_guard = true;
@@ -37,46 +39,6 @@ class Acl implements AclInterface {
 			}
 		}
 		
-	}
-	
-	/**
-	 *
-	 * @param type $resource        	
-	 * @param array $additional_values
-	 *        	additional values from put/post...
-	 * @return boolean
-	 */
-	public function check($resource = null, array $additional_values = []) {
-		if (! $this->_guard) {
-			return true;
-		}
-		
-		if (in_array ( $resource, $this->allways_allow_resources )) {
-			return true;
-		}
-		
-		$filter_result = $this->filter ( $resource, $additional_values );
-		
-		return $filter_result !== FALSE;
-	}
-	
-	public function filter($resource, array $ids = []) {
-		
-		$perm = $this->getPermission ( $resource );
-		
-		if ($perm->allowed && ! $perm->values) {
-			return $ids;
-		}
-		
-		if ($perm->allowed) {
-			return array_intersect ( $ids, $perm->values );
-		}
-		
-		if (!$perm->values) {
-			return FALSE;
-		}
-		
-		return array_diff ( $ids, $perm->values );
 	}
 	
 	public function registerRoleProvider($role_type, AclRoleProvider $roleProvider) {
@@ -123,7 +85,7 @@ class Acl implements AclInterface {
 		}
 		
 		if(isset($authUser->permissions[$resource])) {
-			return $this->_applyHook($authUser->permissions[$resource]);
+			return $authUser->getPermission($resource);
 		}
 		
 		$result = new AclPermission ( $resource );
@@ -138,7 +100,7 @@ class Acl implements AclInterface {
 			}
 		}
 		
-		return $this->_applyHook($result);
+		return $this->applyHook($result);
 	}
 	
 	public function reguard() {
@@ -190,13 +152,17 @@ class Acl implements AclInterface {
 		return $this->auth_user;
 	}
 
-	private function _applyHook(AclPermission $permission) {
+	public function applyHook(AclPermission $permission, AclInterface $acl = null) {
+		if(!$acl) {
+			$acl = $this;
+		}
+		
 		if(!isset($this->registersHooks[$permission->resource])) {
 			return $permission;
 		}
 		
 		foreach ($this->registersHooks[$permission->resource] as $callback) {
-			$handler_result = $callback($permission);
+			$handler_result = $callback($permission, $acl);
 			if($handler_result instanceof AclPermission) {
 				$permission = $permission->mergePermission($handler_result);
 			}

@@ -3,7 +3,7 @@
 use Volicon\Acl\Facades\Acl as AclFacade;
 use Volicon\Acl\Exceptions\NoPermissionsException;
 
-use Volicon\Acl\Models\VirtualModel;
+use Volicon\Acl\Support\DataObject;
 use Illuminate\Support\Collection;
 
 /**
@@ -18,7 +18,7 @@ use Illuminate\Support\Collection;
  * @property Collection $permissions
  * @property Collection $users users ID's
  */
-class AclRole extends VirtualModel {
+class AclRole extends DataObject {
 
 	public function __construct($role) {
 		
