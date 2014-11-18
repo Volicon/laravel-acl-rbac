@@ -85,7 +85,8 @@ class Acl implements AclInterface {
 		}
 		
 		if(isset($authUser->permissions[$resource])) {
-			return $authUser->getPermission($resource);
+			$permission = $authUser->getPermission($resource);
+			return $this->applyHook($permission);
 		}
 		
 		$result = new AclPermission ( $resource );
@@ -152,17 +153,14 @@ class Acl implements AclInterface {
 		return $this->auth_user;
 	}
 
-	public function applyHook(AclPermission $permission, AclInterface $acl = null) {
-		if(!$acl) {
-			$acl = $this;
-		}
+	public function applyHook(AclPermission $permission) {
 		
 		if(!isset($this->registersHooks[$permission->resource])) {
 			return $permission;
 		}
 		
 		foreach ($this->registersHooks[$permission->resource] as $callback) {
-			$handler_result = $callback($permission, $acl);
+			$handler_result = $callback($permission);
 			if($handler_result instanceof AclPermission) {
 				$permission = $permission->mergePermission($handler_result);
 			}
