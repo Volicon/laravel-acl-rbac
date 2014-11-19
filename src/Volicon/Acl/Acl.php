@@ -2,12 +2,14 @@
 
 use Volicon\Acl\Support\AclInterface;
 use Volicon\Acl\Support\AclTrait;
+use Volicon\Acl\Support\MicrotimeDate;
 use Volicon\Acl\RoleProviders\AclRoleProvider;
 use Volicon\Acl\Models\GroupResources;
 use Illuminate\Support\Facades\Config;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\Cache;
-use Auth;
+use Illuminate\Support\Facades\Event;
+use Illuminate\Support\Facades\Auth;
 
 /**
  * Description of Acl
@@ -25,6 +27,8 @@ class Acl implements AclInterface {
 	protected $allways_allow_resources = [ ];
 	protected $registersRoleProviders = [ ];
 	protected $registersHooks = [ ];
+	private $use_cache = false;
+	private $cache_prefix = '_volicon_acl_';
 	
 	public function __construct() {
 		
@@ -38,7 +42,12 @@ class Acl implements AclInterface {
 				$this->registerRoleProvider($role_type, new $roleProvider);
 			}
 		}
-	
+		
+		if(Config::get('acl::using_cache', false)) {
+			$this->use_cache = true;
+			$this->cache_prefix = Config::get('acl::cache_key', $this->cache_prefix);
+		}
+		
 	}
 	
 	public function registerRoleProvider($role_type, AclRoleProvider $roleProvider) {
@@ -136,11 +145,28 @@ class Acl implements AclInterface {
 	}
 	
 	public function getAuthUser() {
+		$auth_user = NULL;
 		if(!Auth::check()) {
-			return NULL;
+			return $auth_user;
 		}
 		
-		return AclUser::findWithPermissions(Auth::id());
+		if($this->use_cache) {
+			$auth_user_cached_time = Cache::get($this->cache_prefix.'_mt_authUser_'.Auth::id(), null);
+			$role_mt = Cache::get($this->cache_prefix.'_last_role_update', null);
+			if($auth_user_cached_time && $role_mt && $role_mt->compare($auth_user_cached_time)) {
+				$auth_user = Cache::get($this->cache_prefix.'_authUser_'.Auth::id());
+			}
+		}
+		
+		if(!$auth_user) {
+			$auth_user = AclUser::findWithPermissions(Auth::id());
+			if($this->use_cache) {
+				Cache::put($this->cache_prefix.'_authUser_'.Auth::id(), $auth_user, 10);
+				Cache::put($this->cache_prefix.'_mt_authUser_'.Auth::id(), new MicrotimeDate(), 10);
+			}
+		}
+		
+		return $auth_user;
 	}
 
 	public function applyHook(AclPermission $permission) {

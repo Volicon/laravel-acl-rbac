@@ -1,6 +1,7 @@
 <?php namespace Volicon\Acl\Models;
 
 use Volicon\Acl\Models\GroupResources;
+use Volicon\Acl\Support\MicrotimeDate;
 use Illuminate\Database\Eloquent\Model as Eloquent;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\Config;
@@ -46,13 +47,15 @@ class Role extends Eloquent {
 		$use_cache = Config::get('acl::using_cache', false);
 		
 		if($use_cache) {
-			$roles = \Cache::rememberForever(self::$cache_key, function() {
+			$roles = Cache::rememberForever(self::$cache_key, function() {
 				$roles = static::with('users','permissions')->get();
 				$result = new Collection();
 			
 				foreach($roles as $role) {
 					$result[] = new AclRole($role);
 				}
+				$cache_prefix = Config::get('acl::cache_key', '_volicon_acl_');
+				Cache::forever($cache_prefix.'_last_role_update', new MicrotimeDate());
 
 				return $result;
 			});
