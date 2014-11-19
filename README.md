@@ -2,7 +2,7 @@ Volicon ACL (RBAC)
 ===========
 
 ACL - Access Control List.
-More precisely this is an RBAC - Role Based Access Control - package for Laravel 4.
+ More precisely this is an RBAC - Role Based Access Control - package for Laravel 4.
 
 **Introduction:**
 
@@ -13,13 +13,13 @@ Each user is assigned 1 or more roles, the returned permission is a union of his
 Example of roles: admin, user, limited user, guest, etc.
 
 
-1. [Installation](##installation)
-2. [Configuration](##configuration)
-3. [Hook callbacks](##hook callbacks)
-4. [Routing] (##Routing)
-5. [Api](##api)
-6. [using with Models](##using with Models)
-7. [Examples](##examples)
+1. [Installation](#installation)
+2. [Configuration](#configuration)
+3. [Hook callbacks](#hook)
+4. [Routing](#routing)
+5. [Api](#api)
+6. [using with Models](#using-with-models)
+7. [Examples](#examples)
 
 
 ##Installation
@@ -186,7 +186,8 @@ boolean behaviour unknown resource and values.
 ```
 
 
-##Hook -- Dynamically change permissions.
+##Hook
+Dynamically change permissions.
 **registerHook** -- you can attach a callback to resource which will return a dynamically calculated permission.
 callback function argument is Volicon\Acl\AclPermission.
 
@@ -208,8 +209,8 @@ Acl::registerHook('ufo.list', function($permission){
 
 ```
 
-
-##Routing (optional) -- check network requests:
+##Routing:
+(optional) check network requests:
 you can set permissions for network request, same format as setting role permission.
 
 in routes.php:
@@ -228,7 +229,7 @@ Route::filter('auth', function()
 		return Redirect::to('/login.html');
 	}
 	try {
-		\Volicon\Acl\AclRoute::check();
+		\Volicon\Acl\AclRoute::validateRoute();
 	} catch (\Volicon\Acl\Exceptions\NoPermissionsException $ex) {
 		return Response::make (json_encode($ex->getMessage()), 403);
 	}
@@ -279,7 +280,7 @@ when going through AclUser permission does not go through hooks, therefore the r
 * $acRole->remove	// delete $acRole from databse.
 
 #using with models
-Inheriting from Volicon\Acl\Models\AclModel will automatically check permissions.
+ Inheriting from Volicon\Acl\Models\AclModel will automatically check permissions.
 AclModel listens to laravel events and checks permission for add, delete, and update.  For select event AclModel will add 'where' in query.
 
 
