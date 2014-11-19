@@ -5,6 +5,7 @@ use Volicon\Acl\Exceptions\NoPermissionsException;
 use User;
 use Volicon\Acl\Support\DataObject;
 use Illuminate\Support\Collection;
+use Illuminate\Support\Facades\Event;
 
 /**
  * Description of Role
@@ -70,13 +71,21 @@ class AclRole extends DataObject {
 	public function add() {
 		/* @var $role_provider  RoleProviders\AclRoleProvider */
 		$role_provider = AclFacade::getRoleProvider($this->attributes['type']);
-		return $role_provider->addRole($this);
+		$result = $role_provider->addRole($this);
+		if($result) {
+			Event::fire('acl_role_added', $result);
+		}
+		return $result;
 	}
 	
 	public function update() {
 		/* @var $role_provider  RoleProviders\AclRoleProvider */
 		$role_provider = AclFacade::getRoleProvider($this->attributes['type']);
-		return $role_provider->updateRole($this);
+		$result = $role_provider->updateRole($this);
+		if($result) {
+			Event::fire('acl_role_updated', $result);
+		}
+		return $result;
 	}
 	
 	public function remove() {
@@ -91,7 +100,11 @@ class AclRole extends DataObject {
 		
 		/* @var $role_provider  RoleProviders\AclRoleProvider */
 		$role_provider = AclFacade::getRoleProvider($this->attributes['type']);
-		return $role_provider->removeRole($this->attributes['role_id']);
+		$result =  $role_provider->removeRole($this->attributes['role_id']);
+		if($result) {
+			Event::fire('acl_role_removed', $result);
+		}
+		return $result;
 	}
 
 	public function offsetSet($offset, $value) {

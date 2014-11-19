@@ -10,6 +10,7 @@ use Volicon\Acl\Models\GroupResources;
 use User;
 use InvalidArgumentException;
 use Illuminate\Support\Collection;
+use Illuminate\Support\Facades\Event;
 
 /**
  * Description of User
@@ -109,8 +110,10 @@ class AclUser extends DataObject implements AclInterface {
 	public function setRoles(array $roleIds) {
 		if($roleIds) {
 			UserRole::where('user_id', '=', $this->getKey())->whereNotIn('role_id', $roleIds)->delete();
+			Event::fire('acl_role_updated', $roleIds);
 		} else {
 			UserRole::where('user_id', '=', $this->getKey())->delete();
+			Event::fire('acl_role_updated');
 			return;
 		}
 		
