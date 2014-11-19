@@ -14,7 +14,7 @@ class UsersRoleProvider extends AclRoleProvider {
 	public function getPermission($resource) {
 		$result = new AclPermission($resource);
 		
-		$authUser = AclUser::find ( Auth::getUser ()->user_id );
+		$authUser = AclUser::find ( Auth::id() );
 		
 		$roles = $this->getRoles($authUser->roles, [], [$resource]);
 		

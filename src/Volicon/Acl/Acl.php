@@ -6,6 +6,7 @@ use Volicon\Acl\RoleProviders\AclRoleProvider;
 use Volicon\Acl\Models\GroupResources;
 use Illuminate\Support\Facades\Config;
 use Illuminate\Support\Collection;
+use Illuminate\Support\Facades\Cache;
 use Auth;
 
 /**
@@ -24,7 +25,6 @@ class Acl implements AclInterface {
 	protected $allways_allow_resources = [ ];
 	protected $registersRoleProviders = [ ];
 	protected $registersHooks = [ ];
-	private $auth_user = null;
 	
 	public function __construct() {
 		
@@ -38,7 +38,7 @@ class Acl implements AclInterface {
 				$this->registerRoleProvider($role_type, new $roleProvider);
 			}
 		}
-		
+	
 	}
 	
 	public function registerRoleProvider($role_type, AclRoleProvider $roleProvider) {
@@ -140,17 +140,7 @@ class Acl implements AclInterface {
 			return NULL;
 		}
 		
-		if($this->auth_user) {
-			if($this->auth_user->user_id !== Auth::getUser()->user_id) {
-				$this->auth_user = NULL;
-			}
-			
-			return $this->auth_user;
-		}
-		
-		$this->auth_user = AclUser::findWithPermissions(Auth::getUser()->user_id);
-		
-		return $this->auth_user;
+		return AclUser::findWithPermissions(Auth::id());
 	}
 
 	public function applyHook(AclPermission $permission) {

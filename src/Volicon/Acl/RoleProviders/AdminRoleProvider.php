@@ -36,7 +36,7 @@ class AdminRoleProvider extends AclRoleProvider {
 	public function addRole(AclRole $role) {
 		
 		if(Acl::isGuard()) {
-			$authUser = AclUser::find ( Auth::getUser ()->user_id );
+			$authUser = AclUser::find ( Auth::id() );
 			if (! in_array ( $this->role_type, $authUser->user_types )) {
 				return new NoPermissionsException ( 'Only admin user can add admin roles' );
 			}
@@ -48,7 +48,7 @@ class AdminRoleProvider extends AclRoleProvider {
 	}
 	public function updateRole(AclRole $role) {
 		if(Acl::isGuard()) {
-			$authUser = AclUser::find ( Auth::getUser ()->user_id );
+			$authUser = AclUser::find ( Auth::id() );
 			if (! in_array ( $this->role_type, $authUser->user_types )) {
 				return new NoPermissionsException ( 'Only admin user can update admin roles' );
 			}
@@ -60,7 +60,7 @@ class AdminRoleProvider extends AclRoleProvider {
 	}
 	public function removeRole($roleId) {
 		if(Acl::isGuard()) {
-			$authUser = AclUser::find ( Auth::getUser ()->user_id );
+			$authUser = AclUser::find ( Auth::id() );
 			if (! in_array ( $this->role_type, $authUser->user_types )) {
 				return new NoPermissionsException ( 'Only admin user can remove admin roles' );
 			}

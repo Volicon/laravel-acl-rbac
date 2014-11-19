@@ -15,15 +15,16 @@ use Illuminate\Support\Collection;
  * Description of User
  *
  * @author nadav.v
- * @property int user_id
  * @property int role_id
  * @property array roles
  * @property array user_types
  */
 class AclUser extends DataObject implements AclInterface {
 	use AclTrait;
-    
-    public function __construct($data) {
+	
+	private static $__user_key;
+
+	public function __construct($data) {
         
         if(is_array($data)) {
             parent::__construct($data);
@@ -32,9 +33,9 @@ class AclUser extends DataObject implements AclInterface {
         } else {
             throw new InvalidArgumentException("argument should be array or User");
         }
-        
+
         if(!isset($this->roles)) {
-            $this->roles = UserRole::where('user_id', '=', $this->user_id)->get(['role_id'])->lists('role_id');
+            $this->roles = UserRole::where('user_id', '=', $this->getKey())->get(['role_id'])->lists('role_id');
             $this->user_types = AclFacade::getRoles($this->roles)->lists('type');
         }
         
@@ -94,10 +95,11 @@ class AclUser extends DataObject implements AclInterface {
      */
     public static function search() {
         $result = new Collection();
+		$key_name = static::getKeyName();
         $users = User::all()->toArray();
 		$usersRoles = UserRole::all(['user_id', 'role_id'])->groupBy('user_id');
 		foreach($users as &$user) {
-			$user['roles'] = isset($usersRoles[$user['user_id']]) ? array_pluck($usersRoles[$user['user_id']], 'role_id') : [];
+			$user['roles'] = isset($usersRoles[$user[$key_name]]) ? array_pluck($usersRoles[$user[$key_name]], 'role_id') : [];
             $result[] = new static($user);
 		}
         
@@ -106,16 +108,16 @@ class AclUser extends DataObject implements AclInterface {
 	
 	public function setRoles(array $roleIds) {
 		if($roleIds) {
-			UserRole::where('user_id', '=', $this->user_id)->whereNotIn('role_id', $roleIds)->delete();
+			UserRole::where('user_id', '=', $this->getKey())->whereNotIn('role_id', $roleIds)->delete();
 		} else {
-			UserRole::where('user_id', '=', $this->user_id)->delete();
+			UserRole::where('user_id', '=', $this->getKey())->delete();
 			return;
 		}
 		
 		$roles = AclFacade::getRoles($roleIds);
 		/* @var $role \Volicon\Acl\AclRole */
 		foreach($roles as $role) {
-			$role->users[] = $this->user_id;
+			$role->users[] = $this->getKey();
 			$role->update();
 		}
 	}
@@ -135,13 +137,25 @@ class AclUser extends DataObject implements AclInterface {
 		
 		$aclUser = $this;
 		if(!isset($this->permissions)) {
-			$aclUser = self::find($this->user_id);
+			$aclUser = self::findWithPermissions($this->getKey());
 		}
 		
 		if(isset($aclUser->permissions[$resource])) {
 			$result = $aclUser->permissions[$resource];
 		}
 		return $result;
+	}
+	
+	public function getKey() {
+		return isset($this[$this->getKeyName()]) ? $this[$this->getKeyName()] : FALSE;
+	}
+	
+	public static function getKeyName() {
+		if(!self::$__user_key) {
+			self::$__user_key = (new User)->getKeyName();
+		}
+		
+		return self::$__user_key;
 	}
 
 }

@@ -2,7 +2,7 @@
 
 use Volicon\Acl\Facades\Acl as AclFacade;
 use Volicon\Acl\Exceptions\NoPermissionsException;
-
+use User;
 use Volicon\Acl\Support\DataObject;
 use Illuminate\Support\Collection;
 
@@ -154,15 +154,17 @@ class AclRole extends DataObject {
 	protected function _aclUsers($users) {
 		$result = new Collection();
 		
+		$user_key = (new User)->getKeyName();
+		
 		foreach($users as $user) {
 			if(is_numeric($user)) {
 				$result[] = (int)$user;
 			} else if(is_array($user)) {
-				if($user['user_id']) {
-					$result[] = (int)$user['user_id'];
+				if(isset($user[$user_key])) {
+					$result[] = (int)$user[$user_key];
 				}
 			} else if(is_object($user)) {
-				$result[] = (int)$user->user_id;
+				$result[] = (int)$user->$user_key;
 			}
 		}
 		
