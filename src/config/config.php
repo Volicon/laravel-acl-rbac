@@ -53,7 +53,11 @@ return array(
 	'roleProviders' => [
 		0 => '\Volicon\Acl\RoleProviders\UsersRoleProvider',
 		1 => '\Volicon\Acl\RoleProviders\AdminRoleProvider'
-	]
+	],
+	
+	'using_cache' => true,
+	
+	'cache_key' => '_volicon_acl_'
 	
 );
 
