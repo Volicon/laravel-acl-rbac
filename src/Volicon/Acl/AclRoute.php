@@ -11,7 +11,7 @@ use Illuminate\Support\Facades\Route;
  */
 class AclRoute {
 	
-	public static function check() {
+	public static function validateRoute() {
 		$route = Route::current();
 		
 		$route_name = $route->getName();
