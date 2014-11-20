@@ -9,11 +9,11 @@ trait AclTrait {
 	/**
 	 *
 	 * @param type $resource        	
-	 * @param array $additional_values
+	 * @param array $ids
 	 *        	additional values from put/post...
 	 * @return boolean
 	 */
-	public function check($resource = null, array $additional_values = []) {
+	public function check($resource = null, array $ids = []) {
 		if (! $this->_guard) {
 			return true;
 		}
@@ -22,9 +22,17 @@ trait AclTrait {
 			return true;
 		}
 		
-		$filter_result = $this->filter ( $resource, $additional_values );
+		$perm = $this->getPermission ( $resource );
 		
-		return $filter_result !== FALSE;
+		if (($perm->allowed && ! $perm->values) || $perm->allowed) {
+			return true;
+		}
+		
+		if (!$perm->values) {
+			return FALSE;
+		}
+		
+		return true;
 	}
 	
 	public function filter($resource, array $ids = []) {
@@ -40,7 +48,7 @@ trait AclTrait {
 		}
 		
 		if (!$perm->values) {
-			return FALSE;
+			return [];
 		}
 		
 		return array_diff ( $ids, $perm->values );
