@@ -1,6 +1,6 @@
 {
     "name": "volicon/laravel-acl-rbac",
-    "description": "",
+    "description": "ACL, RBAC - package for Laravel 4. Permission system based on role(s) or by route.",
     "authors": [
         {
             "name": "Nadav",
