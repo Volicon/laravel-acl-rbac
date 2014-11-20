@@ -158,6 +158,7 @@ class AclModel extends Model {
 			if (Acl::isGuard()) {
 				$result = $this->checkDeletingPermissions ( $model );
 				if (! $result) {
+					$id = $model [$model->getAclKey ()];
 					throw new NoPermissionsException ( "No Permission to delete $class id:" . $id );
 				}
 				return $result;
