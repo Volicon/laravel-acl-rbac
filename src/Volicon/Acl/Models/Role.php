@@ -28,8 +28,8 @@ class Role extends Eloquent {
 			'default'
 	];
 	
-	private static $cache_key;
-	private static $use_cache = false;
+	public static $cache_key;
+	public static $use_cache = false;
 	
 	/**
 	 *
@@ -45,9 +45,7 @@ class Role extends Eloquent {
 	
 	public static function getRoles(array $roleIds = [], $types = [], $resources = []) {
 		
-		$use_cache = Config::get('acl::using_cache', false);
-		
-		if($use_cache) {
+		if(self::$use_cache) {
 			$roles = Cache::rememberForever(self::$cache_key, function() {
 				$roles = static::with('users','permissions')->get();
 				$result = new Collection();
