@@ -29,7 +29,7 @@ Edit your project's composer.json file
 
 ```php
 "require": {
-		"volicon/laravel-acl": "dev-master",
+		"volicon/laravel-acl-rbac": "dev-master",
 },
 "minimum-stability": "dev"
 ```
