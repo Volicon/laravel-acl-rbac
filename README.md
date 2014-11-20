@@ -210,8 +210,8 @@ Acl::registerHook('ufo.list', function($permission){
 ```
 
 ##Routing:
-(optional) check network requests:
-you can set permissions for network request, same format as setting role permission.
+(optional) In order to check every network request add the following code.  
+Dont forget to define the resource in the 'group_resources', and assign the permission in the role.
 
 in routes.php:
 ```php
