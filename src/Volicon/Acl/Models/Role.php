@@ -7,6 +7,7 @@ use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\Config;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\Event;
+use Exception;
 
 use Volicon\Acl\AclRole;
 
@@ -159,9 +160,6 @@ class Role extends Eloquent {
 		
 		$dbRole->permissions()->delete();
 		$dbRole->users()->delete();
-		
-		//TODO: bug in laravel, all roles are deleted and not only 
-		//$dbRole->forceDelete();
 		$dbRole->delete();
 		
 		return $roleId;
@@ -176,7 +174,7 @@ class Role extends Eloquent {
 			Cache::forget(Role::$cache_key);
 		};
 		
-		\Event::listen([
+		Event::listen([
 			'acl_role_added',
 			'acl_role_updated',
 			'acl_role_deleted',
