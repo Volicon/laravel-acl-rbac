@@ -16,7 +16,7 @@ use Auth;
 class AclModel extends Model {
 	protected $acl_field_key = '';
 	
-	public function __construct($attributes = []) {
+	public function __construct(array $attributes = array() ) {
 		
 		parent::__construct ( $attributes );
 		
