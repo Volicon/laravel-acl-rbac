@@ -65,7 +65,7 @@ class AclUser extends DataObject implements AclInterface {
         $user_types = [];
 		$permissions = [];
         
-        $roles = AclFacade::getRoles($user->roles);
+        $roles = $user->roles ? AclFacade::getRoles($user->roles) : [];
 		
 		foreach($roles as $role) {
 			if(!in_array($role->type, $user_types)) {
