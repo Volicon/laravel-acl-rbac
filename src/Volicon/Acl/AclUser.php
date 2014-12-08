@@ -41,7 +41,7 @@ class AclUser extends DataObject implements AclInterface {
         }
         
         if(!isset($this->user_types)) {
-            $this->user_types = AclFacade::getRoles($this->roles)->lists('type');
+            $this->user_types = count($this->roles) ? AclFacade::getRoles($this->roles)->lists('type') : [];
         }
     }
     
