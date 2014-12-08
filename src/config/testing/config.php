@@ -79,6 +79,11 @@ return array(
 	),
 	
 	/**
+	 * If role name set, any user without role, will have this role,
+	 */
+	'default_role' => false,
+	
+	/**
 	 * what is the default permission
 	 */
 	'default_permission' =>  false,
