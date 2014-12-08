@@ -3,10 +3,7 @@
 use \Illuminate\Database\Eloquent\Model;
 use Volicon\Acl\Exceptions\NoPermissionsException;
 use Volicon\Acl\AclPermission;
-// use Volicon\Acl\Facades\Acl;
-use Acl;
-use App;
-use Auth;
+use Volicon\Acl\Facades\Acl;
 
 /**
  * Description of Model
