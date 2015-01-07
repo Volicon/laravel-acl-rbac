@@ -16,14 +16,13 @@ class InstallCommand extends Command {
 	public function fire()
 	{
 		
-		$base_dir = dirname(dirname(dirname(dirname(dirname(dirname(dirname(__FILE__)))))));
-		$base_dir = strrchr($base_dir, DIRECTORY_SEPARATOR);
-		$base_dir = substr($base_dir, 1);
+		$package_path = dirname(dirname(dirname(dirname(dirname(__FILE__)))));
+        $package_name = substr($package_path, strrpos($package_path, DIRECTORY_SEPARATOR)+1);
 		
-		$path = $base_dir.'\volicon\acl\src\config';
+		$path = $package_path.'/src/config';
 		
 		$this->call('config:publish', array('--path' => $path, 'package' => 'volicon/acl'));
 		
-		$this->call('migrate', array('--bench' => 'volicon/acl'));
+		$this->call('migrate', array('--package' => $package_name));
 	}
 }
