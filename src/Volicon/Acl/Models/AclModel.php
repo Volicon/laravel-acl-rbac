@@ -33,7 +33,7 @@ class AclModel extends Model {
 		
 		return $ok !== false ? $builder : $builder->whereRaw ( '1 = 0' );
 	}
-	public static function boot() {
+	protected static function boot() {
 		parent::boot ();
 		
 		self::_registerCreatingPermissions ();
