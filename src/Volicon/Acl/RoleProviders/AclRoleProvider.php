@@ -14,7 +14,6 @@ use Config;
  */
 abstract class AclRoleProvider {
 	protected $role_type;
-	protected $registersHandlers = [ ];
 	
 	final public function setRoleType($role_type) {
 		if (! isset ( $this->role_type )) {
@@ -45,9 +44,6 @@ abstract class AclRoleProvider {
 	}
 	
 	public function getPermission($resource) {
-		if (isset ( $this->registersHandlers [$resource] )) {
-			return $this->registersHandlers [$resource] ();
-		}
 		
 		$result = new AclPermission ( $resource );
 		
