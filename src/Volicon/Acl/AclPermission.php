@@ -118,6 +118,37 @@ class AclPermission extends DataObject {
 		
 	}
 	
+	/*
+	 * create new Permission base on this permission filter by $ids
+	 */
+	public function newSubPermission(array $ids = []) {
+		$result = clone $this;
+		
+		if(!$this->allowed && !$this->values) {
+			return $result;
+		}
+		
+		if(!$ids || $this->isAllowAll()) {
+			$result->values = $ids;
+			return $result;
+		}
+		
+		if($this->allowed) {
+			$result->values = array_intersect($result->values, $ids);
+		} else {
+			$values = array_diff($ids, $this->values);
+			if($values) {
+				$result->allowed = true;
+				$result->values = $values;
+			} else {
+				$result->values = [];
+			}
+		}
+		
+		return $result;
+		
+	}
+
 	public function isAllowAll() {
 		return $this->allowed && !$this->values;
 	}
