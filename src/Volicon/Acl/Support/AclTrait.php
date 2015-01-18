@@ -22,7 +22,7 @@ trait AclTrait {
 			return true;
 		}
 		
-		$perm = $this->getPermission ( $resource );
+		$perm = $this->getPermission ( $resource, $ids );
 		
 		if (($perm->allowed && ! $perm->values) || $perm->allowed) {
 			return true;
@@ -37,7 +37,7 @@ trait AclTrait {
 	
 	public function filter($resource, array $ids = []) {
 		
-		$perm = $this->getPermission ( $resource );
+		$perm = $this->getPermission ( $resource, $ids );
 		
 		if ($perm->allowed && ! $perm->values) {
 			return $ids;

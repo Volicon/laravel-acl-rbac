@@ -43,14 +43,18 @@ abstract class AclRoleProvider {
 		return Role::removeRole($roleId);
 	}
 	
-	public function getPermission($resource) {
+	public function getPermission($resource, array $ids = []) {
 		
 		$result = new AclPermission ( $resource );
+		
+		if($ids){
+			$result = $result->newSubPermission($ids);
+		}
 		
 		$roles = $this->getRoles([],[$resource]);
 		
 		foreach($roles as $role) {
-			$result = $result->mergePermission($role->getPermission($resource));
+			$result = $result->mergePermission($role->getPermission($resource, $ids));
 		}
 		
 		return $result;

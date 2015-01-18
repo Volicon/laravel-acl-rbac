@@ -73,14 +73,14 @@ class Acl implements AclInterface {
 		$this->registersHooks[$resource][] = $callback;
 	}
 
-	public function getPermission($resource) {
+	public function getPermission($resource, array $ids = []) {
 		
 		if(! $this->_guard) {
-			return new AclPermission($resource, [], true);
+			return new AclPermission($resource, $ids, true);
 		}
 		
 		if(in_array($resource, Config::get('acl::allways_allow_resources'))) {
-			return new AclPermission($resource, [], true);
+			return new AclPermission($resource, $ids, true);
 		}
 		
 		$authUser = $this->getAuthUser();
@@ -94,14 +94,14 @@ class Acl implements AclInterface {
 		}
 		
 		if(isset($authUser->permissions[$resource])) {
-			$permission = $authUser->getPermission($resource);
-			return $this->applyHook($permission);
+			$permission = $authUser->getPermission($resource, $ids);
+			return $this->applyHook($permission, $ids);
 		}
 		
-		$result = new AclPermission ( $resource );
+		$result = new AclPermission ( $resource, $ids );
 		foreach ( $authUser->user_types as $type ) {
 			if (isset ( $this->registersRoleProviders [$type] )) {
-				$permission = $this->registersRoleProviders [$type]->getPermission ( $resource );
+				$permission = $this->registersRoleProviders [$type]->getPermission ( $resource, $ids );
 				$result = $result->mergePermission ( $permission );
 			}
 			
@@ -110,7 +110,7 @@ class Acl implements AclInterface {
 			}
 		}
 		
-		return $this->applyHook($result);
+		return $this->applyHook($result, $ids);
 	}
 	
 	public function reguard() {
@@ -169,14 +169,14 @@ class Acl implements AclInterface {
 		return $auth_user;
 	}
 
-	public function applyHook(AclPermission $permission) {
+	public function applyHook(AclPermission $permission, $ids=[]) {
 		
 		if(!isset($this->registersHooks[$permission->resource])) {
 			return $permission;
 		}
 		
 		foreach ($this->registersHooks[$permission->resource] as $callback) {
-			$handler_result = $callback($permission);
+			$handler_result = $callback($permission, $ids);
 			if($handler_result instanceof AclPermission) {
 				$permission = $permission->mergePermission($handler_result);
 			}

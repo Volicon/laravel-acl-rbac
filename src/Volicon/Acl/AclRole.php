@@ -61,11 +61,14 @@ class AclRole extends DataObject {
 		}
 	}
 	
-	public function getPermission($resource) {
+	public function getPermission($resource, $ids=[]) {
 		
 		$permissions = $this->permissions->keyBy('resource');
 		
-		return isset($permissions[$resource]) ? $permissions[$resource] : new AclPermission($resource);
+		$result = isset($permissions[$resource]) ? $permissions[$resource] : new AclPermission($resource);
+		if($ids) {
+			$result = $result->newSubPermission($ids);
+		}
 	}
 
 	public function add() {

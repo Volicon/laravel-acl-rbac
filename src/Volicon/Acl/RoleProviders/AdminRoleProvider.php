@@ -68,7 +68,7 @@ class AdminRoleProvider extends AclRoleProvider {
 		
 		return parent::removeRole ( $roleId );
 	}
-	public function getPermission($resource) {
+	public function getPermission($resource, array $ids = []) {
 		return new AclPermission ( $resource, [ ], true );
 	}
 }

@@ -10,7 +10,7 @@ use Illuminate\Support\Facades\Facade;
  * @method bool check(string $resource, array $ids = [])
  * @method array filter(string $resource, array $ids = [])
  * @method undefined registerRoleProvider(int $role_type, \Volicon\Acl\RoleProviders\AclRoleProvider $roleProvider)
- * @method bool getPermission(string $resource)
+ * @method bool getPermission(string $resource, array $ids = [])
  * @method undefined reguard()
  * @method undefined unguard()
  * @method bool isGuard()

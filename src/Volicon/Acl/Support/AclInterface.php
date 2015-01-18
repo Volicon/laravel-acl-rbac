@@ -15,5 +15,5 @@ interface AclInterface {
 	 */
 	public function check($resource, array $ids = []);
 	public function filter($resource, array $ids = []);
-	public function getPermission($resource);
+	public function getPermission($resource, array $ids = []);
 }

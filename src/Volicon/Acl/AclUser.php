@@ -125,10 +125,10 @@ class AclUser extends DataObject implements AclInterface {
 		}
 	}
 
-	public function getPermission($resource) {
+	public function getPermission($resource, array $ids = []) {
 		
 		if(in_array($resource, Config::get('acl::allways_allow_resources'))) {
-			return new AclPermission($resource, [], true);
+			return new AclPermission($resource, $ids, true);
 		}
 		
 		$groupResource = GroupResources::getResourceGroup($resource);
@@ -138,6 +138,10 @@ class AclUser extends DataObject implements AclInterface {
 		
 		$result = new AclPermission($resource);
 		
+		if($ids) {
+			$result = $result->newSubPermission($ids);
+		}
+		
 		$aclUser = $this;
 		if(!isset($this->permissions)) {
 			$aclUser = self::findWithPermissions($this->getKey());
@@ -145,6 +149,9 @@ class AclUser extends DataObject implements AclInterface {
 		
 		if(isset($aclUser->permissions[$resource])) {
 			$result = $aclUser->permissions[$resource];
+			if($ids) {
+				$result = $result->newSubPermission($ids);
+			}
 		}
 		return $result;
 	}

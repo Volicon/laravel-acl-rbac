@@ -11,8 +11,12 @@ use Auth;
  */
 class UsersRoleProvider extends AclRoleProvider {
 	
-	public function getPermission($resource) {
+	public function getPermission($resource, array $ids = []) {
 		$result = new AclPermission($resource);
+		
+		if($ids) {
+			$result = $result->newSubPermission($ids);
+		}
 		
 		$authUser = AclUser::find ( Auth::id() );
 		
@@ -21,7 +25,7 @@ class UsersRoleProvider extends AclRoleProvider {
 		foreach($roles as $role) {
 			$permissions = $role->permissions->keyBy('resource');
 			if(isset($permissions[$resource])) {
-				$result = $result->mergePermission($permissions[$resource]);
+				$result = $result->mergePermission($permissions[$resource]->newSubPermission($ids));
 			}
 		}
 		
