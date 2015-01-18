@@ -87,6 +87,12 @@ class AclPermission extends DataObject {
 			}
 			
 			$values = array_diff ( $p2->values, $p1->values );
+			
+			//check if there are same values but one permission allow but other not
+			if(!$values && $p2->values) {
+				return new self($p1->resource, $values, true);
+			}
+			
 			return new self($p1->resource, $values, false);
 		}
 		
