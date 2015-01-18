@@ -71,7 +71,4 @@ class AdminRoleProvider extends AclRoleProvider {
 	public function getPermission($resource) {
 		return new AclPermission ( $resource, [ ], true );
 	}
-	public function registerResourceHandler($resource, $callback) {
-		return;
-	}
 }
