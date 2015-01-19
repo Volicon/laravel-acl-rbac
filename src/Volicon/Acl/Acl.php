@@ -98,7 +98,7 @@ class Acl implements AclInterface {
 			return $this->applyHook($permission, $ids);
 		}
 		
-		$result = new AclPermission ( $resource, $ids );
+		$result = new AclPermission ( $resource );
 		foreach ( $authUser->user_types as $type ) {
 			if (isset ( $this->registersRoleProviders [$type] )) {
 				$permission = $this->registersRoleProviders [$type]->getPermission ( $resource, $ids );

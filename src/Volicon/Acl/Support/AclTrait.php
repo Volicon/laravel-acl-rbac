@@ -24,11 +24,11 @@ trait AclTrait {
 		
 		$perm = $this->getPermission ( $resource, $ids );
 		
-		if (($perm->allowed && ! $perm->values) || $perm->allowed) {
+		if ($perm->allowed) {
 			return true;
 		}
 		
-		if (!$perm->values) {
+		if (!$perm->values || $ids) {
 			return FALSE;
 		}
 		
