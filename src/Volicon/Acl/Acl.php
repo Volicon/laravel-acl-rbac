@@ -66,11 +66,19 @@ class Acl implements AclInterface {
 	}
 	
 	public function registerHook($resource, $callback) {
-		if(!isset($this->registersHooks[$resource])) {
-			$this->registersHooks[$resource] = [];
+		
+		if(!is_array($resource)) {
+			$resource = [$resource];
 		}
 		
-		$this->registersHooks[$resource][] = $callback;
+		foreach($resource as $res) {
+		
+			if(!isset($this->registersHooks[$res])) {
+				$this->registersHooks[$res] = [];
+			}
+
+			$this->registersHooks[$res][] = $callback;
+		}
 	}
 
 	public function getPermission($resource, array $ids = []) {
