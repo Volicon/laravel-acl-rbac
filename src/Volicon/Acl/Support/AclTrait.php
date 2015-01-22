@@ -53,4 +53,6 @@ trait AclTrait {
 		
 		return array_diff ( $ids, $perm->values );
 	}
+	
+	public abstract function getPermission($resource = null, array $ids = []);
 }
