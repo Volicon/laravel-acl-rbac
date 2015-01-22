@@ -14,12 +14,16 @@ use Config;
  */
 abstract class AclRoleProvider {
 	protected $role_type;
-	static protected $all_role_types = [];
+	private static $all_role_types = [];
 
 	final public function setRoleType($role_type) {
 		if (! isset ( $this->role_type )) {
 			$this->role_type = $role_type;
-			static::$all_role_types[] = $role_type;
+			$class_name = get_class(new static());
+			if(!isset(self::$all_role_types[$class_name])) {
+				self::$all_role_types[$class_name] = [];
+			}
+			self::$all_role_types[$class_name][] = $role_type;
 		} else {
 			throw new Exception ( 'role type already set for ' . get_class ( new static () ) );
 		}
@@ -117,7 +121,8 @@ abstract class AclRoleProvider {
 	 * @return array
 	 */
 	public static function getAllTypes() {
-		return static::$all_role_types;
+		$class_name = get_class(new static());
+		return isset(self::$all_role_types[$class_name]) ? self::$all_role_types[$class_name] : [];
 	}
 
 }
