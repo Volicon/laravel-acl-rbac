@@ -8,8 +8,8 @@ use Volicon\Acl\Models\GroupResources;
 use Illuminate\Support\Facades\Config;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\Cache;
-use Illuminate\Support\Facades\Event;
 use Illuminate\Support\Facades\Auth;
+use Closure;
 
 /**
  * Description of Acl
@@ -130,6 +130,21 @@ class Acl implements AclInterface {
 	
 	public function isGuard() {
 		return $this->_guard;
+	}
+	
+	/**
+	 * run function without ACL restictions.	 
+	 * @param Closure $closure
+	 * @return mix closure result
+	 */
+	public function runUnguardCallback(Closure $closure) {
+		$isGuard = $this->isGuard();
+		$this->unguard();
+		$result = $closure();
+		if($isGuard) {
+			$this->reguard();
+		}
+		return $result;
 	}
 
 	public function getRoleProvider($role_type) {

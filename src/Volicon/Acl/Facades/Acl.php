@@ -14,6 +14,7 @@ use Illuminate\Support\Facades\Facade;
  * @method undefined reguard()
  * @method undefined unguard()
  * @method bool isGuard()
+ * @method mix runUnguardCallback(\Closure $closure) run function without ACL restictions.
  * @method \Volicon\Acl\RoleProviders\AclRoleProvider getRoleProvider()
  * @method array getRoles(array $roleIds = [])
  * 
