@@ -110,7 +110,6 @@ class AclUser extends DataObject implements AclInterface {
 	public function setRoles(array $roleIds) {
 		if($roleIds) {
 			UserRole::where('user_id', '=', $this->getKey())->whereNotIn('role_id', $roleIds)->delete();
-			Event::fire('acl_role_updated', $roleIds);
 		} else {
 			UserRole::where('user_id', '=', $this->getKey())->delete();
 			Event::fire('acl_role_updated');
@@ -123,6 +122,8 @@ class AclUser extends DataObject implements AclInterface {
 			$role->users[] = $this->getKey();
 			$role->update();
 		}
+		$this->roles = $roleIds;
+		Event::fire('acl_role_updated', $roleIds);
 	}
 
 	public function getPermission($resource, array $ids = []) {
