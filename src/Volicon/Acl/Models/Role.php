@@ -85,7 +85,8 @@ class Role extends Eloquent {
 			$groupResources = GroupResources::getGroupResources();
 			$resourcesIds = [];
 			foreach($resources as $resource) {
-				$resourcesIds[] = array_search($resource, $groupResources);
+				
+				$resourcesIds[] = $groupResources->search($resource);;
 			}
 			
 			$query->whereIn('permission_id', $resourcesIds);
