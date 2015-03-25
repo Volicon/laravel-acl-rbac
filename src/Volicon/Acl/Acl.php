@@ -169,7 +169,7 @@ class Acl implements AclInterface {
 	
 	public function getAuthUser() {
 		$auth_user = NULL;
-		if(!Auth::check()) {
+		if(!Auth::id()) {
 			return $auth_user;
 		}
 		
@@ -184,8 +184,8 @@ class Acl implements AclInterface {
 		if(!$auth_user) {
 			$auth_user = AclUser::findWithPermissions(Auth::id());
 			if($this->use_cache) {
-				Cache::put($this->cache_prefix.'_authUser_'.Auth::id(), $auth_user, 10);
-				Cache::put($this->cache_prefix.'_mt_authUser_'.Auth::id(), new MicrotimeDate(), 10);
+				Cache::forever($this->cache_prefix.'_authUser_'.Auth::id(), $auth_user);
+				Cache::forever($this->cache_prefix.'_mt_authUser_'.Auth::id(), new MicrotimeDate());
 			}
 		}
 		
