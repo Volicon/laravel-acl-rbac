@@ -40,6 +40,9 @@ abstract class AclRoleProvider {
 	}
 	
 	public function updateRole(AclRole $role) {
+		if(!$this->allowUpdateRole()) {
+			return new NoPermissionsException ( 'Not allow to update role.' );
+		}
 		$role->role_type = $this->role_type;
 		$role->permissions = $this->addSubResources($role->permissions);
 		return Role::updateRole($role);
@@ -64,6 +67,10 @@ abstract class AclRoleProvider {
 		}
 		
 		return $result;
+	}
+	
+	public function allowUpdateRole() {
+		return true;
 	}
 
 	protected function addSubResources($permissions) {

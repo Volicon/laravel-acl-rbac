@@ -116,13 +116,28 @@ class AclUser extends DataObject implements AclInterface {
 			return;
 		}
 		
-		$roles = AclFacade::getRoles($roleIds);
-		/* @var $role \Volicon\Acl\AclRole */
-		foreach($roles as $role) {
-			$role->users[] = $this->getKey();
-			$role->update();
+		$new_roles = array_diff($roleIds, $this->roles);
+		$exist_roles = array_intersect($roleIds, $this->roles);
+		$new_role_saved = [];
+		if(count($new_roles)) {
+			$roleProviders = AclFacade::getRoleProvidersTypes();
+			foreach($roleProviders as $rp_type) {
+				$rp = AclFacade::getRoleProvider($rp_type);
+				if($rp->allowUpdateRole()) {
+					$roles = $rp->getRoles($new_roles);
+					foreach($roles as $role) {
+						$role_id = $role->role_id;
+						UserRole::create([
+							'user_id' => $this->user_id,
+							'role_id' => $role_id
+						]);
+						$new_role_saved[] = $role_id;
+					}
+				}
+			}
 		}
-		$this->roles = $roleIds;
+		
+		$this->roles = array_merge($exist_roles, $new_role_saved);
 		Event::fire('acl_role_updated', $roleIds);
 	}
 

@@ -71,4 +71,15 @@ class AdminRoleProvider extends AclRoleProvider {
 	public function getPermission($resource, array $ids = []) {
 		return new AclPermission ( $resource, [ ], true );
 	}
+	
+	public function allowUpdateRole() {
+		if(Acl::isGuard()) {
+			$authUser = AclUser::find ( Auth::id() );
+			if (! in_array ( $this->role_type, $authUser->user_types )) {
+				return false;
+			}
+		}
+		
+		return true;
+	}
 }
