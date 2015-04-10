@@ -31,7 +31,17 @@ class AclServiceProvider extends ServiceProvider {
 	 */
 	public function register()
 	{
-		//
+		$this->app['acl_install_command'] = $this->app->share(function($app)
+		  {
+			  return new Commands\InstallCommand;
+		  });
+		  
+		  $this->app['acl_update_command'] = $this->app->share(function($app)
+		  {
+			  return new Commands\UpdateCommand;
+		  });
+		  $this->commands('acl_install_command');
+		  $this->commands('acl_update_command');
 	}
 
 	/**
