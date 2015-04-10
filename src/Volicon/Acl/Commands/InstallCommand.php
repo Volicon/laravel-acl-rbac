@@ -23,6 +23,6 @@ class InstallCommand extends Command {
 		
 		$this->call('config:publish', array('--path' => $path, 'package' => 'volicon/acl'));
 		
-		$this->call('migrate', array('--package' => $package_name));
+		$this->call('migrate', array('--package' => 'volicon/'.$package_name));
 	}
 }
