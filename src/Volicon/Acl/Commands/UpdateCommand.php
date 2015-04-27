@@ -43,24 +43,22 @@ class UpdateCommand extends Command {
 				$rolesMap [$row->name] = $row->role_id;
 			}
 			
-			\Acl::unguard ();
-			
-			foreach ( $role_permissions as $role ) {
+			Acl::runUnguardCallback(function() use ($role_permissions, $rolesMap) {			
+				foreach ( $role_permissions as $role ) {
 				
-				$aclRole = new AclRole($role);
-				$role_name = $role ['name'];
+					$aclRole = new AclRole($role);
+					$role_name = $role ['name'];
 				
-				if (isset ( $rolesMap [$role_name] )) {
-					$role['role_id'] = $rolesMap [$role_name];
-					$aclRole = new AclRole($role);
-					$aclRole->update();
-				} else {
-					$aclRole = new AclRole($role);
-					$aclRole->add();
-				}
+					if (isset ( $rolesMap [$role_name] )) {
+						$role['role_id'] = $rolesMap [$role_name];
+						$aclRole = new AclRole($role);
+						$aclRole->update();
+					} else {
+						$aclRole = new AclRole($role);
+						$aclRole->add();
+					}
 			}
-			
-			\Acl::reguard ();
+			});
 			
 			$roles_ids = array_values ( $rolesMap );
 			
@@ -118,12 +116,12 @@ class UpdateCommand extends Command {
 	public function updateRolesResources() {
 		$roles = Acl::getRoles ();
 		\Eloquent::unguard ();
-		Acl::unguard ();
-		/* @var $role \Volicon\Acl\AclRole */
-		foreach ( $roles as $role ) {
-			$role->update();
-		}
-		Acl::reguard ();
+		Acl::runUnguardCallback(function() use ($roles) {
+			/* @var $role \Volicon\Acl\AclRole */
+			foreach ( $roles as $role ) {
+				$role->update();
+			}
+		});
 		\Eloquent::reguard ();
 	}
 }
