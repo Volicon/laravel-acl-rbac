@@ -21,7 +21,6 @@ class Acl implements AclInterface {
 	
 	public $result = false;
 	public $values_perms = [ ];
-	protected $_guard = true;
 	protected $group_resources = [ ];
 	protected $route_resources_in_group = [ ];
 	protected $allways_allow_resources = [ ];
@@ -192,14 +191,22 @@ class Acl implements AclInterface {
 		return $auth_user;
 	}
 
-	public function applyHook(AclPermission $permission, $ids=[]) {
+	public function applyHook(AclPermission $permission, $ids=[], $acl = null) {
 		
 		if(!isset($this->registersHooks[$permission->resource])) {
 			return $permission;
 		}
+        
+        if(!$acl) {
+            $acl = $this;
+        }
+        
+        if(!in_array('Volicon\Acl\Support\AclTrait', class_uses($acl))) {
+            throw new \InvalidArgumentException("Argument 3 passed to Volicon\Acl\Acl::applyHook() must be use AclTrait");
+        }
 		
 		foreach ($this->registersHooks[$permission->resource] as $callback) {
-			$handler_result = $callback($permission, $ids);
+			$handler_result = $callback($permission, $ids, $acl);
 			if($handler_result instanceof AclPermission) {
 				$permission = $permission->mergePermission($handler_result);
 			}

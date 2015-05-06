@@ -163,6 +163,8 @@ class AclUser extends DataObject implements AclInterface {
 		if($ids) {
 			$result = $result->newSubPermission($ids);
 		}
+        
+        $result = AclFacade::applyHook($result, $ids, $this);
 		
 		$aclUser = $this;
 		if(!isset($this->permissions)) {

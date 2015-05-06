@@ -6,6 +6,9 @@
  * @author nadav.v
  */
 trait AclTrait {
+    
+    protected $_guard = true;
+    
 	/**
 	 *
 	 * @param type $resource        	
@@ -18,7 +21,7 @@ trait AclTrait {
 			return true;
 		}
 		
-		if (in_array ( $resource, $this->allways_allow_resources )) {
+		if (in_array ( $resource, \Config::get ( 'acl::allways_allow_resources', [ ] ) )) {
 			return true;
 		}
 		
