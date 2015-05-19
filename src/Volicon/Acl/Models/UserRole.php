@@ -18,10 +18,9 @@ class UserRole extends \Eloquent {
 
 	public static function updateRoleUsers(AclRole $role) {
 		
-		$current_users = UserRole::where('role_id', '=', $role->role_id)->get();
-		$defaults_users = $current_users->where('default')->lists('user_id');
+		$current_users = UserRole::where('role_id', '=', $role->role_id)->lists('user_id');
 		
-		$users_to_delete = array_diff($current_users->lists('user_id'), $role->users->toArray(), $defaults_users);
+		$users_to_delete = array_diff($current_users, $role->users->toArray());
 		if($users_to_delete) {
 			static::where ( 'role_id', '=', $role->role_id )->whereIn('user_id', $users_to_delete)->delete();
 			
