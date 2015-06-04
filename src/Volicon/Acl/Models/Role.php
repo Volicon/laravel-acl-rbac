@@ -8,7 +8,7 @@ use Illuminate\Support\Facades\Config;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\Event;
 use Exception;
-
+use DB;
 use Volicon\Acl\AclRole;
 
 class Role extends Eloquent {
@@ -127,6 +127,7 @@ class Role extends Eloquent {
 	}
 	
 	public static function updateRole(AclRole $role) {
+        DB::beginTransaction();
 		$dbRole = static::find($role->role_id);
 		
 		if(!$dbRole) {
@@ -141,7 +142,7 @@ class Role extends Eloquent {
 		RolePermission::updateRolePermissions($role);
 		
 		UserRole::updateRoleUsers($role);
-		
+		DB::commit();
 		return $role->role_id;
 		
 	}

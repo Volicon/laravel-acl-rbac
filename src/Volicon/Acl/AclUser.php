@@ -13,6 +13,7 @@ use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\Event;
 use Illuminate\Support\Facades\Cache;
 use Volicon\Acl\Support\MicrotimeDate;
+use DB;
 
 /**
  * Description of User
@@ -110,37 +111,31 @@ class AclUser extends DataObject implements AclInterface {
     }
 	
 	public function setRoles(array $roleIds) {
-		if($roleIds) {
-			UserRole::where('user_id', '=', $this->getKey())->whereNotIn('role_id', $roleIds)->delete();
-		} else {
-			UserRole::where('user_id', '=', $this->getKey())->delete();
-			Event::fire('acl_role_updated');
-			$cache_prefix = Config::get('acl::cache_key', '_volicon_acl_');
-			Cache::forever($cache_prefix.'_last_role_update', new MicrotimeDate());
-			return;
-		}
+        DB::beginTransaction();
 		
 		$new_roles = array_diff($roleIds, $this->roles);
 		$exist_roles = array_intersect($roleIds, $this->roles);
+        $deleted_roles = array_diff($this->roles, $roleIds);
 		$new_role_saved = [];
-		if(count($new_roles)) {
-			$roleProviders = AclFacade::getRoleProvidersTypes();
-			foreach($roleProviders as $rp_type) {
-				$rp = AclFacade::getRoleProvider($rp_type);
-				if($rp->allowUpdateRole()) {
-					$roles = $rp->getRoles($new_roles);
-					foreach($roles as $role) {
-						$role_id = $role->role_id;
-						UserRole::create([
-							'user_id' => $this->user_id,
-							'role_id' => $role_id
-						]);
-						$new_role_saved[] = $role_id;
-					}
+		$roleProviders = AclFacade::getRoleProvidersTypes();
+		foreach($roleProviders as $rp_type) {
+			$rp = AclFacade::getRoleProvider($rp_type);
+			if($rp->allowUpdateRole()) {
+				$roles_to_delete = $rp->getRoles($deleted_roles)->lists('role_id');
+				UserRole::where('user_id', '=', $this->getKey())->whereIn('role_id', $roles_to_delete)->delete();
+				$roles = $new_roles ? $rp->getRoles($new_roles) : [];
+				foreach($roles as $role) {
+					$role_id = $role->role_id;
+					UserRole::create([
+						'user_id' => $this->user_id,
+						'role_id' => $role_id
+					]);
+					$new_role_saved[] = $role_id;
 				}
 			}
 		}
 		
+        DB::commit();
 		$this->roles = array_merge($exist_roles, $new_role_saved);
 		Event::fire('acl_role_updated', $roleIds);
 		$cache_prefix = Config::get('acl::cache_key', '_volicon_acl_');
