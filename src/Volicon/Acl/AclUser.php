@@ -122,7 +122,9 @@ class AclUser extends DataObject implements AclInterface {
 			$rp = AclFacade::getRoleProvider($rp_type);
 			if($rp->allowUpdateRole()) {
 				$roles_to_delete = $deleted_roles ? $rp->getRoles($deleted_roles)->lists('role_id') : [];
-				UserRole::where('user_id', '=', $this->getKey())->whereIn('role_id', $roles_to_delete)->delete();
+				if ($roles_to_delete) {
+					UserRole::where('user_id', '=', $this->getKey())->whereIn('role_id', $roles_to_delete)->delete();
+				}
 				$roles = $new_roles ? $rp->getRoles($new_roles) : [];
 				foreach($roles as $role) {
 					$role_id = $role->role_id;
