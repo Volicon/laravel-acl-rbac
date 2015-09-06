@@ -170,14 +170,15 @@ class Role extends Eloquent {
 		static::$cache_key = Config::get('acl::cache_key', '').'_model_Role_';
 		static::$use_cache = Config::get('acl::using_cache', false);
 		
-		$clear_cache_func = function() {
+		$clear_cache_func = function($result) {
 			Cache::forget(Role::$cache_key);
+			Event::fire('acl_role_changed', $result);
 		};
 		
 		Event::listen([
 			'acl_role_added',
 			'acl_role_updated',
-			'acl_role_deleted',
+			'acl_role_removed',
 		], $clear_cache_func);
 		
 		
