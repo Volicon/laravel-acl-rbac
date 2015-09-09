@@ -1,6 +1,6 @@
 {
     "name": "volicon/laravel-acl-rbac",
-    "description": "ACL / RBAC - package for Laravel 4.  Can work with Models or routes",
+    "description": "ACL / RBAC - package for Laravel 5.  Can work with Models or routes",
     "authors": [
         {
             "name": "Nadav Vinik",
@@ -8,8 +8,8 @@
         }
     ],
     "require": {
-        "php": ">=5.4.0",
-        "illuminate/support": "4.*"
+        "php": ">=5.5.0",
+        "illuminate/support": "5.*"
     },
 	"require-dev": {
         "phpunit/phpunit": "3.7.*",
