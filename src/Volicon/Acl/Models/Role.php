@@ -172,7 +172,7 @@ class Role extends Eloquent {
 		
 		$clear_cache_func = function($result) {
 			Cache::forget(Role::$cache_key);
-			Event::fire('acl_role_changed', $result);
+			Event::fire('acl_role_changed', array($result));
 		};
 		
 		Event::listen([

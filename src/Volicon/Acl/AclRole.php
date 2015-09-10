@@ -76,7 +76,7 @@ class AclRole extends DataObject {
 		$role_provider = AclFacade::getRoleProvider($this->attributes['type']);
 		$result = $role_provider->addRole($this);
 		if($result) {
-			Event::fire('acl_role_added', $result);
+			Event::fire('acl_role_added', array($result));
 		}
 		return $result;
 	}
@@ -86,7 +86,7 @@ class AclRole extends DataObject {
 		$role_provider = AclFacade::getRoleProvider($this->attributes['type']);
 		$result = $role_provider->updateRole($this);
 		if($result) {
-			Event::fire('acl_role_updated', $result);
+			Event::fire('acl_role_updated', array($result));
 		}
 		return $result;
 	}
@@ -105,7 +105,7 @@ class AclRole extends DataObject {
 		$role_provider = AclFacade::getRoleProvider($this->attributes['type']);
 		$result =  $role_provider->removeRole($this->attributes['role_id']);
 		if($result) {
-			Event::fire('acl_role_removed', $result);
+			Event::fire('acl_role_removed', array($result));
 		}
 		return $result;
 	}
