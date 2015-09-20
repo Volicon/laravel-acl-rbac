@@ -18,7 +18,6 @@ class AclServiceProvider extends ServiceProvider {
 	 */
 	public function boot()
     {
-		$this->package('volicon/acl');
 		
 		$this->app->bind('Acl', function() {
 		    return new Acl();
