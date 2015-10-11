@@ -22,6 +22,15 @@ class AclServiceProvider extends ServiceProvider {
 		$this->app->bind('Acl', function() {
 		    return new Acl();
 		});
+		
+		$this->publishes([
+                    __DIR__.'/../../config/config.php' => config_path('volicon-acl\config.php')
+    ], 'config');
+
+		$this->publishes([
+                    __DIR__.'/../../migrations' => database_path('migrations')
+    ], 'migrations');
+
 	}
 	/**
 	 * Register the service provider.

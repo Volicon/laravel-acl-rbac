@@ -15,14 +15,10 @@ class InstallCommand extends Command {
 	 */
 	public function fire()
 	{
+		$this->output->writeln('Publish config and migration');
+        \Artisan::call('vendor:publish', array('--provider' => 'Volicon\Acl\AclServiceProvider'), $this->output);
 		
-		$package_path = dirname(dirname(dirname(dirname(dirname(__FILE__)))));
-        $package_name = substr($package_path, strrpos($package_path, DIRECTORY_SEPARATOR)+1);
-		
-		$path = $package_path.'/src/config';
-		
-		$this->call('config:publish', array('--path' => $path, 'package' => 'volicon/acl'));
-		
-		$this->call('migrate', array('--package' => 'volicon/'.$package_name));
+		//$this->call('vendor:publish', array('--provider' => 'Volicon\Acl\AclServiceProvider', '--tag' => 'config'));
+		//$this->call('vendor:publish', array('--provider' => 'Volicon\Acl\AclServiceProvider', '--tag' => 'migrations'));
 	}
 }
