@@ -19,7 +19,7 @@ class AclPermission extends DataObject {
 		
 		$data = [];
 		
-		$default_permission = Config::get ( "acl::config.default_permission" );
+		$default_permission = Config::get ( "volicon-acl.config.default_permission" );
 		
 		if(is_array($resource)) {
 			$resource = (object)$resource;

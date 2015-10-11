@@ -31,10 +31,10 @@ class Acl implements AclInterface {
 	
 	public function __construct() {
 		
-		$this->group_resources = Config::get ( 'acl::config.group_resources' );
-		$this->allways_allow_resources = \Config::get ( 'acl::allways_allow_resources', [ ] );
+		$this->group_resources = Config::get ( 'volicon-acl.config.group_resources' );
+		$this->allways_allow_resources = \Config::get ( 'volicon-acl.config.allways_allow_resources', [ ] );
 		
-		$roleProviders = Config::get('acl::config.roleProviders');
+		$roleProviders = Config::get('volicon-acl.config.roleProviders');
 		
 		foreach($roleProviders as $role_type => $roleProvider) {
 			if(is_subclass_of($roleProvider, 'Volicon\Acl\RoleProviders\AclRoleProvider')) {
@@ -42,9 +42,9 @@ class Acl implements AclInterface {
 			}
 		}
 		
-		if(Config::get('acl::using_cache', false)) {
+		if(Config::get('volicon-acl.config.using_cache', false)) {
 			$this->use_cache = true;
-			$this->cache_prefix = Config::get('acl::cache_key', $this->cache_prefix);
+			$this->cache_prefix = Config::get('volicon-acl.config.cache_key', $this->cache_prefix);
 		}
 		
 	}
@@ -86,7 +86,7 @@ class Acl implements AclInterface {
 			return new AclPermission($resource, $ids, true);
 		}
 		
-		if(in_array($resource, Config::get('acl::allways_allow_resources'))) {
+		if(in_array($resource, Config::get('volicon-acl.config.allways_allow_resources'))) {
 			return new AclPermission($resource, $ids, true);
 		}
 		

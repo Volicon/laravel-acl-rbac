@@ -140,13 +140,13 @@ class AclUser extends DataObject implements AclInterface {
         DB::commit();
 		$this->roles = array_merge($exist_roles, $new_role_saved);
 		Event::fire('acl_role_updated', $roleIds);
-		$cache_prefix = Config::get('acl::cache_key', '_volicon_acl_');
+		$cache_prefix = Config::get('volicon-acl.config.cache_key', '_volicon_acl_');
 		Cache::forever($cache_prefix.'_last_role_update', new MicrotimeDate());
 	}
 
 	public function getPermission($resource, array $ids = []) {
 		
-		if(in_array($resource, Config::get('acl::allways_allow_resources'))) {
+		if(in_array($resource, Config::get('volicon-acl.config.allways_allow_resources'))) {
 			return new AclPermission($resource, $ids, true);
 		}
 		

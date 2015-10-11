@@ -30,7 +30,7 @@ class GroupResources extends \Eloquent {
 	}
 	
 	public static function getDependentGroupsResources() {
-		$config_group_resources = Config::get('acl::config.group_resources');
+		$config_group_resources = Config::get('volicon-acl.config.group_resources');
 		$result = [];
 		
 		$func_data = function(&$data) {
@@ -74,7 +74,7 @@ class GroupResources extends \Eloquent {
 			return;
 		}
 		
-		$config_group_resources = Config::get('acl::config.group_resources');
+		$config_group_resources = Config::get('volicon-acl.config.group_resources');
 		
 		foreach($config_group_resources as $group=>&$resources) {
 			foreach($resources as $resource) {
@@ -87,7 +87,7 @@ class GroupResources extends \Eloquent {
 	}
 	
 	private static function _get_config_group ($resource) {
-		$group_resources = Config::get('acl::config.group_resources');
+		$group_resources = Config::get('volicon-acl.config.group_resources');
 		$data = $group_resources[$resource];
 		
 		if(!is_array($data)) {

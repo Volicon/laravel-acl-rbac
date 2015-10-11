@@ -53,7 +53,7 @@ class Role extends Eloquent {
 				foreach($roles as $role) {
 					$result[] = new AclRole($role);
 				}
-				$cache_prefix = Config::get('acl::cache_key', '_volicon_acl_');
+				$cache_prefix = Config::get('volicon-acl.config.cache_key', '_volicon_acl_');
 				Cache::forever($cache_prefix.'_last_role_update', new MicrotimeDate());
 
 				return $result;
@@ -167,8 +167,8 @@ class Role extends Eloquent {
 	
 	public static function boot() {
 		parent::boot();
-		static::$cache_key = Config::get('acl::cache_key', '').'_model_Role_';
-		static::$use_cache = Config::get('acl::using_cache', false);
+		static::$cache_key = Config::get('volicon-acl.config.cache_key', '').'_model_Role_';
+		static::$use_cache = Config::get('volicon-acl.config.using_cache', false);
 		
 		$clear_cache_func = function($result) {
 			Cache::forget(Role::$cache_key);

@@ -2,8 +2,8 @@
 
 use ArrayAccess;
 use JsonSerializable;
-use Illuminate\Support\Contracts\JsonableInterface;
-use Illuminate\Support\Contracts\ArrayableInterface;
+use Illuminate\Contracts\Support\Arrayable as ArrayableInterface;
+use Illuminate\Contracts\Support\Jsonable as JsonableInterface;
 
 /**
  * Description of DataObject

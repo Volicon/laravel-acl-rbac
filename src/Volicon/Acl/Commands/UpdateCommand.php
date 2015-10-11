@@ -15,8 +15,8 @@ class UpdateCommand extends Command {
 	public function fire() {
 		$updateRolesOpt = $this->option ( 'update-roles' );
 		
-		$role_permissions = Config::get ( "acl::config.roles" );
-		$group_resources = Config::get ( "acl::config.group_resources" );
+		$role_permissions = Config::get ( "volicon-acl.config.roles" );
+		$group_resources = Config::get ( "volicon-acl.config.group_resources" );
 		
 		$db_group_resources = GroupResources::all ();
 		$db_role_permissions = RolePermission::all ();

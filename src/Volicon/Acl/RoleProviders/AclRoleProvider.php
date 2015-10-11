@@ -78,7 +78,7 @@ abstract class AclRoleProvider {
 		
 		$sub_resources = [ ];
 		$dependent_resources = [ ];
-		$group_resources = Config::get('acl::group_resources', []);
+		$group_resources = Config::get('volicon-acl.config.group_resources', []);
 		
 		$dependent_group_resources = GroupResources::getDependentGroupsResources();
 		

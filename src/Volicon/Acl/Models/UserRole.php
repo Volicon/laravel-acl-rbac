@@ -54,7 +54,7 @@ class UserRole extends \Eloquent {
 	 * 
 	 */
 	public static function getDefaultRoleId() {
-		$default_role = Config::get('acl::default_role', false);
+		$default_role = Config::get('volicon-acl.config.default_role', false);
 		if($default_role) {
 			$role = Role::where('name', '=', $default_role)->where('default', '=', 1)->get();
 			return $role->count() ? $role[0]->role_id : false;

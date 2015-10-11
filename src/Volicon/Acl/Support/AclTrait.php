@@ -21,7 +21,7 @@ trait AclTrait {
 			return true;
 		}
 		
-		if (in_array ( $resource, \Config::get ( 'acl::allways_allow_resources', [ ] ) )) {
+		if (in_array ( $resource, \Config::get ( 'volicon-acl.config.allways_allow_resources', [ ] ) )) {
 			return true;
 		}
 		
