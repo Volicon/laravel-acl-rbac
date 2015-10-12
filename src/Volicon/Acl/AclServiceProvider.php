@@ -24,11 +24,11 @@ class AclServiceProvider extends ServiceProvider {
 		});
 		
 		$this->publishes([
-                    __DIR__.'/../../config/config.php' => config_path('volicon-acl\config.php')
+                    __DIR__.'/../../../config/config.php' => config_path('volicon-acl\config.php')
     ], 'config');
 
 		$this->publishes([
-                    __DIR__.'/../../migrations' => database_path('migrations')
+                    __DIR__.'/../../../migrations' => database_path('migrations')
     ], 'migrations');
 
 	}
