@@ -33,7 +33,7 @@ class RolePermission extends \Eloquent {
 		}
 		
 		$db_role_perm = RolePermission::where ( 'role_id', '=', $role->role_id )->get()->keyBy('permission_id');
-		$db_perm_ids = $db_role_perm->lists('permission_id');
+		$db_perm_ids = $db_role_perm->lists('permission_id')->toArray();
 		$perm_to_delete = array_diff($db_perm_ids, $perm_ids);
 		$perm_to_add = array_diff($perm_ids, $db_perm_ids);
 		

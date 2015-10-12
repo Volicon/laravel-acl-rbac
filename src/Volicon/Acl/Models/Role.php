@@ -65,7 +65,7 @@ class Role extends Eloquent {
 						return !(
 								($roleIds && !in_array($role->role_id, $roleIds)) ||
 								($types && !in_array($role->type, $types)) ||
-								($resources && !array_intersect($role->permissions->lists('resource'), $resources))
+								($resources && !array_intersect($role->permissions->lists('resource')->toArray(), $resources))
 						) ;
 
 				}

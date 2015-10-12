@@ -39,12 +39,12 @@ class AclUser extends DataObject implements AclInterface {
         }
 
         if(!isset($this->roles)) {
-            $this->roles = UserRole::where('user_id', '=', $this->getKey())->get(['role_id'])->lists('role_id');
-            $this->user_types = AclFacade::getRoles($this->roles)->lists('type');
+            $this->roles = UserRole::where('user_id', '=', $this->getKey())->get(['role_id'])->lists('role_id')->toArray();
+            $this->user_types = AclFacade::getRoles($this->roles)->lists('type')->toArray();
         }
         
         if(!isset($this->user_types)) {
-            $this->user_types = count($this->roles) ? AclFacade::getRoles($this->roles)->lists('type') : [];
+            $this->user_types = count($this->roles) ? AclFacade::getRoles($this->roles)->lists('type')->toArray() : [];
         }
     }
     
@@ -121,7 +121,7 @@ class AclUser extends DataObject implements AclInterface {
 		foreach($roleProviders as $rp_type) {
 			$rp = AclFacade::getRoleProvider($rp_type);
 			if($rp->allowUpdateRole()) {
-				$roles_to_delete = $deleted_roles ? $rp->getRoles($deleted_roles)->lists('role_id') : [];
+				$roles_to_delete = $deleted_roles ? $rp->getRoles($deleted_roles)->lists('role_id')->toArray() : [];
 				if ($roles_to_delete) {
 					UserRole::where('user_id', '=', $this->getKey())->whereIn('role_id', $roles_to_delete)->delete();
 				}
