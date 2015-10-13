@@ -4,6 +4,7 @@ use Volicon\Acl\AclPermission;
 use Volicon\Acl\Models\Role;
 use Volicon\Acl\AclRole;
 use Volicon\Acl\Models\GroupResources;
+use Volicon\Acl\Exceptions\NoPermissionsException;
 use Exception;
 use Config;
 
