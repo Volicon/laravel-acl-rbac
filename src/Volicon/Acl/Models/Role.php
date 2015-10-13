@@ -7,6 +7,7 @@ use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\Config;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\Event;
+use Volicon\Acl\Exceptions\NoPermissionsException;
 use Exception;
 use DB;
 use Volicon\Acl\AclRole;
