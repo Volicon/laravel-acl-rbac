@@ -7,7 +7,6 @@ use Volicon\Acl\Support\AclInterface;
 use Volicon\Acl\Support\AclTrait;
 use Illuminate\Support\Facades\Config;
 use Volicon\Acl\Models\GroupResources;
-use User;
 use InvalidArgumentException;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\Event;
@@ -30,9 +29,11 @@ class AclUser extends DataObject implements AclInterface {
 
 	public function __construct($data) {
         
+		$user_class = \Config::get('auth.model', 'App\Http\User');
+        
         if(is_array($data)) {
             parent::__construct($data);
-        } else if($data instanceof User) {
+        } else if(is_a ($data, $user_class)) {
             parent::__construct($data->toArray());
         } else {
             throw new InvalidArgumentException("argument should be array or User");
@@ -49,7 +50,8 @@ class AclUser extends DataObject implements AclInterface {
     }
     
     public static function find($user_id) {
-        $user = User::find($user_id);
+		$user_class = \Config::get('auth.model', 'App\Http\User');
+        $user = $user_class::find($user_id);
 		
 		if(!$user) {
             return NULL;
@@ -100,7 +102,8 @@ class AclUser extends DataObject implements AclInterface {
     public static function search() {
         $result = new Collection();
 		$key_name = static::getKeyName();
-        $users = User::all()->toArray();
+		$user_class = \Config::get('auth.model', 'App\Http\User');
+        $users = $user_class::all()->toArray();
 		$usersRoles = UserRole::all(['user_id', 'role_id'])->groupBy('user_id');
 		foreach($users as &$user) {
 			$user['roles'] = isset($usersRoles[$user[$key_name]]) ? array_pluck($usersRoles[$user[$key_name]], 'role_id') : [];
@@ -183,7 +186,8 @@ class AclUser extends DataObject implements AclInterface {
 	
 	public static function getKeyName() {
 		if(!self::$__user_key) {
-			self::$__user_key = (new User)->getKeyName();
+			$user_class = \Config::get('auth.model', 'App\Http\User');
+			self::$__user_key = (new $user_class)->getKeyName();
 		}
 		
 		return self::$__user_key;

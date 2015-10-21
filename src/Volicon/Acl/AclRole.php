@@ -2,7 +2,6 @@
 
 use Volicon\Acl\Facades\Acl as AclFacade;
 use Volicon\Acl\Exceptions\NoPermissionsException;
-use User;
 use Volicon\Acl\Support\DataObject;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\Event;
@@ -169,8 +168,9 @@ class AclRole extends DataObject {
 
 	protected function _aclUsers($users) {
 		$result = new Collection();
+		$user_class = \Config::get('auth.model', 'App\Http\User');
 		
-		$user_key = (new User)->getKeyName();
+		$user_key = (new $user_class)->getKeyName();
 		
 		foreach($users as $user) {
 			if(is_numeric($user)) {
