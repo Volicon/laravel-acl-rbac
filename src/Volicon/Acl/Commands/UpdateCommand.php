@@ -112,6 +112,7 @@ class UpdateCommand extends Command {
 			) );
 		}
 		\Eloquent::reguard ();
+		GroupResources::refreshGroupResources();
 	}
 	public function updateRolesResources() {
 		$roles = Acl::getRoles ();
