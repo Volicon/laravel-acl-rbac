@@ -28,7 +28,15 @@ class GroupResources extends \Eloquent {
 		
 		return new Collection(self::$group_resources);
 	}
-	
+
+	public static function refreshGroupResources() {
+		/**
+		* TODO: use events instead this method
+		*/
+		self::$group_resources = [];
+		static::getGroupResources();
+	}
+
 	public static function getDependentGroupsResources() {
 		$config_group_resources = Config::get('acl::config.group_resources');
 		$result = [];
