@@ -50,8 +50,8 @@ class AclUser extends DataObject implements AclInterface {
     }
     
     public static function find($user_id) {
-		$user_class = \Config::get('auth.model', 'App\Http\User');
-        $user = $user_class::find($user_id);
+	$user_class = \Config::get('auth.providers.users.model', 'App\User');
+	$user = $user_class::find($user_id);
 		
 		if(!$user) {
             return NULL;
