@@ -142,7 +142,7 @@ class AclUser extends DataObject implements AclInterface {
 		
         DB::commit();
 		$this->roles = array_merge($exist_roles, $new_role_saved);
-		Event::fire('acl_role_updated', $roleIds);
+		Event::fire('acl_role_updated', [$roleIds]);
 		$cache_prefix = Config::get('volicon-acl.config.cache_key', '_volicon_acl_');
 		Cache::forever($cache_prefix.'_last_role_update', new MicrotimeDate());
 	}
