@@ -49,6 +49,10 @@ class Acl implements AclInterface {
 		
 	}
 	
+	if(\App::runningInConsole()) {
+		$this->unguard();
+	}
+	
 	public function registerRoleProvider($role_type, AclRoleProvider $roleProvider) {
 		if (! is_int ( $role_type )) {
 			throw new \Exception ( "role_type should be number $role_type given" );
