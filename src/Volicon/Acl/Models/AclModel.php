@@ -43,7 +43,7 @@ class AclModel extends Model {
 	protected function applyPermissionsRules($builder) {
 		$class = get_class ( $this );
 		$class = str_replace('App\\', '', $class);
-		$user_class = \Config::get('auth.model', 'App\Http\User');
+		$user_class = \Config::get('auth.providers.users.model', 'App\User');
 		$user_class = str_replace('App\\', '', $user_class);
 		if ($class == $user_class) { // bug to fix, use to login
 			return;
