@@ -42,15 +42,15 @@ class Acl implements AclInterface {
 			}
 		}
 		
+		if(\App::runningInConsole()) {
+			$this->unguard();
+		}
+		
 		if(Config::get('volicon-acl.config.using_cache', false)) {
 			$this->use_cache = true;
 			$this->cache_prefix = Config::get('volicon-acl.config.cache_key', $this->cache_prefix);
 		}
 		
-	}
-	
-	if(\App::runningInConsole()) {
-		$this->unguard();
 	}
 	
 	public function registerRoleProvider($role_type, AclRoleProvider $roleProvider) {
