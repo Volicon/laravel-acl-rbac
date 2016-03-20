@@ -36,11 +36,11 @@ class Role extends Eloquent {
 	 * @return Roll
 	 */
 	public function users() {
-		return $this->HasMany ( 'Volicon\Acl\Models\UserRole', 'role_id' );
+		return $this->HasMany ( UserRole::class, 'role_id' );
 	}
 	
 	public function permissions() {
-		return $this->hasMany ( 'Volicon\Acl\Models\RolePermission', 'role_id' );
+		return $this->hasMany ( RolePermission::class, 'role_id' );
 	}
 	
 	public static function getRoles(array $roleIds = [], $types = [], $resources = []) {
