@@ -98,6 +98,8 @@ class AclModel extends Model {
 		static::creating ( function ($model) {
 			if (Acl::isGuard()) {
 				$class = get_class ( $model );
+				$class = str_ireplace('App\\', '', $class);
+				$class = ltrim($class, '\\');
 				$result = Acl::check ( $class . '.insert' );
 				if (! $result) {
 					throw new NoPermissionsException ( "No Permission to create $class" );
@@ -119,6 +121,8 @@ class AclModel extends Model {
 		static::updating ( function ($model) {
 			if (Acl::isGuard()) {
 				$class = get_class ( $model );
+				$class = str_ireplace('App\\', '', $class);
+				$class = ltrim($class, '\\');
 				$id = $model [$model->getAclKey ()];
 				$result = Acl::check ( $class . '.update', [ 
 						$id 
@@ -143,6 +147,8 @@ class AclModel extends Model {
 		static::deleting ( function ($model) {
 			if (Acl::isGuard()) {
 				$class = get_class ( $model );
+				$class = str_ireplace('App\\', '', $class);
+				$class = ltrim($class, '\\');
 				$id = $model [$model->getAclKey ()];
 				$result = Acl::check ( $class . '.delete', [ 
 						$id 
