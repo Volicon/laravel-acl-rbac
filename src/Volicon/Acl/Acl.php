@@ -37,7 +37,7 @@ class Acl implements AclInterface {
 		$roleProviders = Config::get('volicon-acl.config.roleProviders');
 		
 		foreach($roleProviders as $role_type => $roleProvider) {
-			if(is_subclass_of($roleProvider, 'Volicon\Acl\RoleProviders\AclRoleProvider')) {
+			if(is_subclass_of($roleProvider, AclRoleProvider::class)) {
 				$this->registerRoleProvider($role_type, new $roleProvider);
 			}
 		}
@@ -205,7 +205,7 @@ class Acl implements AclInterface {
             $acl = $this;
         }
         
-        if(!in_array('Volicon\Acl\Support\AclTrait', class_uses($acl))) {
+        if(!in_array(AclTrait::class, class_uses($acl))) {
             throw new \InvalidArgumentException("Argument 3 passed to Volicon\Acl\Acl::applyHook() must be use AclTrait");
         }
 		
