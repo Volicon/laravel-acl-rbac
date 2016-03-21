@@ -16,7 +16,10 @@ class AclRoute {
 		
 		$route_name = $route->getName();
 		if(!$route_name) {
-			$route_name = $route->getActionName();
+			$route_name = explode('\\', $route->getActionName());
+			if($route_name) {
+				$route_name = end($route_name);
+			}
 		}
 		
 		$params = $route->parametersWithoutNulls();
