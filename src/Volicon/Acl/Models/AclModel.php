@@ -12,6 +12,7 @@ use Volicon\Acl\Facades\Acl;
  */
 class AclModel extends Model {
 	protected $acl_field_key = '';
+	protected $aclResourceKey = null;
 	
 	public function __construct(array $attributes = array() ) {
 		
@@ -41,9 +42,7 @@ class AclModel extends Model {
 		self::_registerDeletingPermissions ();
 	}
 	protected function applyPermissionsRules($builder) {
-		$class = get_class ( $this );
-		$class = str_replace('App\\', '', $class);
-		$class = ltrim($class, '\\');
+		$class = $this->getAclResourceKey();
 		$user_class = \Config::get('auth.providers.users.model', 'App\User');
 		$user_class = str_replace('App\\', '', $user_class);
 		if ($class == $user_class) { // bug to fix, use to login
@@ -85,6 +84,23 @@ class AclModel extends Model {
 		
 		// return $builder->whereRaw('1 = 0');
 	}
+	public function getAclResourceKey() {
+            if(!empty($this->aclResourceKey)) {
+                return $this->aclResourceKey;
+            }
+            
+            $class = get_class ( $this );
+            $class = str_replace('App\\', '', $class);
+            $class = ltrim($class, '\\');
+            return $class;
+        }
+        
+        public function setAclResourceKey($resourceKey) {
+            if(is_string($resourceKey) && !empty($resourceKey)) {
+                $this->aclResourceKey = $resourceKey;
+            }
+        }
+        
 	protected function getAclKey() {
 		return $this->acl_field_key;
 	}
@@ -98,9 +114,7 @@ class AclModel extends Model {
 	private static function _registerCreatingPermissions() {
 		static::creating ( function ($model) {
 			if (Acl::isGuard()) {
-				$class = get_class ( $model );
-				$class = str_ireplace('App\\', '', $class);
-				$class = ltrim($class, '\\');
+				$class = $model->getAclResourceKey();
 				$result = Acl::check ( $class . '.insert' );
 				if (! $result) {
 					throw new NoPermissionsException ( "No Permission to create $class" );
@@ -121,9 +135,7 @@ class AclModel extends Model {
 	private static function _registerUpdatingPermissions() {
 		static::updating ( function ($model) {
 			if (Acl::isGuard()) {
-				$class = get_class ( $model );
-				$class = str_ireplace('App\\', '', $class);
-				$class = ltrim($class, '\\');
+				$class = $model->getAclResourceKey();
 				$id = $model [$model->getAclKey ()];
 				$result = Acl::check ( $class . '.update', [ 
 						$id 
@@ -147,9 +159,7 @@ class AclModel extends Model {
 	private static function _registerDeletingPermissions() {
 		static::deleting ( function ($model) {
 			if (Acl::isGuard()) {
-				$class = get_class ( $model );
-				$class = str_ireplace('App\\', '', $class);
-				$class = ltrim($class, '\\');
+				$class = $model->getAclResourceKey();
 				$id = $model [$model->getAclKey ()];
 				$result = Acl::check ( $class . '.delete', [ 
 						$id 
