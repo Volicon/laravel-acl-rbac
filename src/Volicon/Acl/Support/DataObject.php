@@ -58,4 +58,8 @@ abstract class DataObject  implements ArrayAccess, ArrayableInterface, JsonableI
 		return isset($this->attributes[$name]);
 	}
 	
+	public function __unset($name) {
+		unset($this->attributes[$name]);
+	}
+	
 }
