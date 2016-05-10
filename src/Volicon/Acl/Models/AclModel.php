@@ -23,6 +23,11 @@ class AclModel extends Model {
 		}
 	}
 	
+	public function setKeyName($key) {
+	    $this->acl_field_key = $key;
+	    return parent::setKeyName($key);
+	}
+	
 	public function newQuery() {
 		$builder = parent::newQuery ();
 		
